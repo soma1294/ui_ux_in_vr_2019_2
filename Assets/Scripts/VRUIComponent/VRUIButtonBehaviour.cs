@@ -197,8 +197,8 @@ public class VRUIButtonBehaviour : MonoBehaviour
         startTouchPosition = touchingObjectTransform.position;
         currentTouchPosition = touchingObjectTransform.position;
         buttonIsTouched = true;
-        //Vibration
-        if (currentPosition == startPosition || waitTime > 0 && currentPosition.y < maxPushDistance)
+        //Vibration TODO: Why is this skipped?
+        if (VibrationBehaviour != null && !VibrationBehaviour.Equals(null) && (currentPosition == startPosition || waitTime > 0) && currentPosition.y < maxPushDistance)
         {
             VibrationBehaviour.Vibrate();
         }

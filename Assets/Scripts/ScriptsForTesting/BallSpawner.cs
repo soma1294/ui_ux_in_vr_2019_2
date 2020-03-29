@@ -8,7 +8,11 @@ public class BallSpawner : MonoBehaviour
     public Material materialOfBall;
     public bool randomizeScale;
     public bool randomizeMovement;
-    public float power;
+
+    public VRUISliderBehaviour slider;
+
+    [SerializeField]
+    private float power;
 
     public void SpawnBall()
     {
@@ -32,5 +36,26 @@ public class BallSpawner : MonoBehaviour
         }
         ball.GetComponent<MeshRenderer>().material = material;
         Destroy(ball, 3f);
+    }
+
+    public void SpawnBallWithOwnMaterialAndPower(Material material)
+    {
+        GameObject ball = Instantiate(ballToSpawn, transform.position, Quaternion.identity);
+        if (randomizeScale)
+            ball.transform.localScale = Vector3.one * Random.Range(0.1f, 1f);
+        ball.GetComponent<Rigidbody>().AddForce(transform.forward * power, ForceMode.Impulse);
+        ball.GetComponent<MeshRenderer>().material = material;
+        Destroy(ball, 8f);
+    }
+
+    public float Power
+    {
+        get { return power; }
+        set { power = value; }
+    }
+
+    public void SetPowerWithSlider()
+    {
+        power = slider.CurrentValue;
     }
 }

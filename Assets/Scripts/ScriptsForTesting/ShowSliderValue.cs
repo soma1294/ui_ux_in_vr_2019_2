@@ -16,6 +16,6 @@ public class ShowSliderValue : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        textcontainerBehaviour.ChangeTextTo("" + sliderBehaviour.CurrentValue);
+        textcontainerBehaviour.ChangeTextTo("" + sliderBehaviour.CurrentValue.ToString("0"));
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(Rigidbody))]
 [ExecuteInEditMode]
@@ -45,6 +46,17 @@ public class VRUISliderBehaviour : MonoBehaviour
     private GameObject path;
     [SerializeField]
     private GameObject physicalKnob;
+    //OnValueChanged
+    [System.Serializable]
+    public class VRUISliderEvent : UnityEvent<float> { }
+    [SerializeField]
+    private VRUISliderEvent m_OnValueChanged = new VRUISliderEvent();
+    public VRUISliderEvent onValueChanged
+    {
+        get { return m_OnValueChanged; }
+        set { m_OnValueChanged = value; }
+    }
+    private float oldValue;
 
     //Variables that store the position and other such values of the path.
     private Vector3 startOfPath;
@@ -74,6 +86,7 @@ public class VRUISliderBehaviour : MonoBehaviour
             //Place handle at the start position
             SetupSliderKnobPosition();
         }
+        oldValue = currentValue;
     }
 
     // Update is called once per frame
@@ -89,6 +102,11 @@ public class VRUISliderBehaviour : MonoBehaviour
             gestureControllerToMonitor = null;
             touchingObjectTransform = null;
         }
+        if (currentValue != oldValue)
+        {
+            m_OnValueChanged.Invoke(CurrentValue);
+        }
+        oldValue = currentValue;
     }
 
     private void FixedUpdate()
@@ -147,6 +165,10 @@ public class VRUISliderBehaviour : MonoBehaviour
 
     public void UpdateKnobPosition()
     {
+        if (MaxValue == 0)
+        {
+            MaxValue = 1;
+        }
         float distance = Vector3.Distance(startOfPath, endOfPath);
         Vector3 targetPos = (endOfPath - startOfPath).normalized 
                           * distance 
