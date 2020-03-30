@@ -9,3 +9,5 @@
 ### Zusätzlich nötig: 
   - Oculus Integration
   - TMPro
+
+## [Link zum Wiki](https://github.com/soma1294/ui_ux_in_vr_2019_2/wiki)
