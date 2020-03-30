@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
+//using UnityEditor;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 [ExecuteInEditMode]
@@ -36,14 +36,14 @@ public class VRUIPanelBehaviour : MonoBehaviour
         PanelSizeY = 1;
         RedrawPanel();
         //On undo, we want to Redraw the panel to make sure it has the correct size.
-        Undo.undoRedoPerformed -= RedrawPanel;
-        Undo.undoRedoPerformed += RedrawPanel;
+        //Undo.undoRedoPerformed -= RedrawPanel;
+        //Undo.undoRedoPerformed += RedrawPanel;
     }
 
     private void OnDestroy()
     {
         //Remove our fuction from the delegate when this Monobehaviour is destroyed
-        Undo.undoRedoPerformed -= RedrawPanel;
+        //Undo.undoRedoPerformed -= RedrawPanel;
     }
 
     protected void FirstDrawPanel()

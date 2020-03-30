@@ -32,6 +32,9 @@ public class VRUISliderBehaviour : MonoBehaviour
     [Tooltip("How fast the knob adjusts its position. 0 means it never reaches the new position, 1 it reaches it almost instantly.")]
     private float stifness = 0.5f;
     [SerializeField]
+    [Tooltip("If the object/hand that touches the knob is farther away than this, the knob wont be moved.")]
+    private float maxAllowedDistanceToMove;
+    [SerializeField]
     [Tooltip("If this is true, it is assumed that the GestureController component is on the hand/object that can touch the knob.\n" +
              "If this is false, any trigger collider can interact with the knob.")]
     private bool useGestureController = true;
@@ -65,6 +68,7 @@ public class VRUISliderBehaviour : MonoBehaviour
     private Transform touchingObjectTransform;
     private bool knobIsTouched;
     private Vector3 startTouchPosition;
+    private Vector3 startTouchKnobPosition;
     private Vector3 currentTouchPosition;
     private Vector3 deltaTouchPosition;
     private VRUIGestureController gestureController;
@@ -96,54 +100,31 @@ public class VRUISliderBehaviour : MonoBehaviour
         endOfPath = new Vector3(0.0f, lengthOfPath / 2, 0.0f);
         if (path && physicalKnob)
             UpdateCurrentValue();
-        if (gestureControllerToMonitor && gestureControllerToMonitor.VRUIGesture != VRUIGesture.IndexPointing)
+        if (Application.isPlaying)
         {
-            knobIsTouched = false;
-            gestureControllerToMonitor = null;
-            touchingObjectTransform = null;
+            if ((gestureControllerToMonitor && gestureControllerToMonitor.VRUIGesture != gesture) || Vector3.Distance(touchingObjectTransform.position, PhysicalKnob.transform.position) > maxAllowedDistanceToMove)
+            {
+                knobIsTouched = false;
+                gestureControllerToMonitor = null;
+                touchingObjectTransform = null;
+            }
+            if (currentValue != oldValue)
+            {
+                m_OnValueChanged.Invoke(CurrentValue);
+            }
+            oldValue = currentValue;
         }
-        if (currentValue != oldValue)
-        {
-            m_OnValueChanged.Invoke(CurrentValue);
-        }
-        oldValue = currentValue;
     }
 
     private void FixedUpdate()
     {
         if (knobIsTouched)
         {
-            /*
-            Debug.Log("Knob Touched");
             currentTouchPosition = touchingObjectTransform.position;
-            Vector3 localTouchPosition = transform.worldToLocalMatrix * currentTouchPosition;
-            Vector3 targetPosition;
-            if ((localTouchPosition.y * transform.up).y >= endOfPath.y)
-            {
-                targetPosition = new Vector3(0f, endOfPath.y, zPositionKnob);
-            }
-            else if ((localTouchPosition.y * transform.up).y <= startOfPath.y)
-            {
-                targetPosition = new Vector3(0f, startOfPath.y, zPositionKnob);
-            }
-            else
-            {
-                targetPosition = (localTouchPosition.y * transform.up) + new Vector3(0,0,zPositionKnob);
-            }
-            Debug.Log("currentTouchPosition: " + currentTouchPosition);
-            Debug.Log("LocalTouchPosition: " + localTouchPosition);
-            Debug.Log("Up: " + transform.up);
-            Debug.Log("targetPosition: " + targetPosition);
-            PhysicalKnob.transform.localPosition = targetPosition;
-            */
-            currentTouchPosition = touchingObjectTransform.position;
-            deltaTouchPosition = currentTouchPosition - startTouchPosition;
+            //deltaTouchPosition = currentTouchPosition - startTouchPosition;
+            deltaTouchPosition = currentTouchPosition - startTouchKnobPosition;
             Vector3 localDeltaTouchPosition = transform.worldToLocalMatrix * deltaTouchPosition;
             Vector3 targetPosition;
-            //Debug.Log("CurrentTouchPosition: " + currentTouchPosition);
-            //Debug.Log("LocalDeltaTouchPosition: " + localDeltaTouchPosition);
-            //Debug.Log("StartOfPath: " + startOfPath);
-            //Debug.Log("EndOfPath: " + endOfPath);
 
             targetPosition.x = 0f;
             targetPosition.y = PhysicalKnob.transform.localPosition.y + localDeltaTouchPosition.y;
@@ -151,14 +132,11 @@ public class VRUISliderBehaviour : MonoBehaviour
             if (targetPosition.y >= endOfPath.y)
             {
                 targetPosition = new Vector3(0f, endOfPath.y, zPositionKnob);
-                //Debug.Log("End reached.");
             }
             else if (targetPosition.y <= startOfPath.y)
             {
                 targetPosition = new Vector3(0f, startOfPath.y, zPositionKnob);
-                //Debug.Log("Start reached.");
             }
-            //Debug.Log("TargetPosition: " + targetPosition);
             PhysicalKnob.transform.localPosition = Vector3.Lerp(PhysicalKnob.transform.localPosition, targetPosition, stifness);
         }
     }
@@ -239,17 +217,40 @@ public class VRUISliderBehaviour : MonoBehaviour
         {
             if (!gestureController)
                 return;
+            //Debug.Log("sliderGestureEnter= " + gestureController.VRUIGesture);
             if (gestureController.VRUIGesture != gesture)
                 return;
         }
         touchingObjectTransform = other.transform;
 
         startTouchPosition = touchingObjectTransform.position;
+        startTouchKnobPosition = PhysicalKnob.transform.position;
         currentTouchPosition = touchingObjectTransform.position;
 
         knobIsTouched = true;
     }
 
+    private void OnTriggerStay(Collider other)
+    {
+        //Debug.Log("TriggerEnterSlider: " + other.gameObject.name);
+        gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
+        if (useGestureController)
+        {
+            if (!gestureController)
+                return;
+            //Debug.Log("sliderGestureEnter= " + gestureController.VRUIGesture);
+            if (gestureController.VRUIGesture != gesture)
+                return;
+        }
+        touchingObjectTransform = other.transform;
+
+        startTouchPosition = touchingObjectTransform.position;
+        startTouchKnobPosition = PhysicalKnob.transform.position;
+        currentTouchPosition = touchingObjectTransform.position;
+
+        knobIsTouched = true;
+    }
+    /*
     private void OnTriggerExit(Collider other)
     {
         if (useGestureController)
@@ -261,7 +262,7 @@ public class VRUISliderBehaviour : MonoBehaviour
         touchingObjectTransform = null;
         knobIsTouched = false;
         gestureControllerToMonitor = gestureController;
-    }
+    }*/
 
     //TODO: Aufpassen ob Formel robust genung für kleinen Max und grossen Min Wert ist.
     public float MinValue

@@ -16,7 +16,7 @@ public class ActivateCorrectTracking : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(handTrackingModels[0].IsTracked)
+        if(handTrackingModels[0].IsTracked && handTrackingModels[1].IsTracked)
         {
             //Deactivate controllerTracking controllermodels
             controllerTrackingModels[0].SetActive(false);
