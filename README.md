@@ -9,15 +9,3 @@
 ### Zusätzlich nötig: 
   - Oculus Integration
   - TMPro
- 
-## Anleitung
-
-### Demoszene:
-
-Die Szene in der sich alle VRUI Komponenten zum ausprobieren befinden heisst "Demoscene". Es wird empfohlen das Projekt für Oculus Quest zu builden. 
-
-#### Demoscene mit Oculus Quest:
-Standardmässig ist Handtracking aktiviert.
-
-#### Demoscene im Editor:
-Es ist auch möglich die Komponenten direkt im Editor zu testen.
