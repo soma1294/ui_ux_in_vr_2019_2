@@ -7,6 +7,8 @@ public class ActivateCorrectTracking : MonoBehaviour
     public OVRHand[] handTrackingModels;
     public GameObject[] controllerTrackingModels;
 
+    private OVRTouchSample.Hand test;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -32,6 +34,15 @@ public class ActivateCorrectTracking : MonoBehaviour
             //Activate controllerTracking controllerModels
             controllerTrackingModels[0].SetActive(true);
             controllerTrackingModels[1].SetActive(true);
+        }
+        //If confidence is low, dont render the hands
+        if (handTrackingModels[0].HandConfidence == OVRHand.TrackingConfidence.Low)
+        {
+            handTrackingModels[0].gameObject.transform.GetChild(0).gameObject.SetActive(false);
+        }
+        if (handTrackingModels[1].HandConfidence == OVRHand.TrackingConfidence.Low)
+        {
+            handTrackingModels[1].gameObject.transform.GetChild(0).gameObject.SetActive(false);
         }
     }
 }

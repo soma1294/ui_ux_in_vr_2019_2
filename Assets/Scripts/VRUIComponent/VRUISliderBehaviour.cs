@@ -91,6 +91,8 @@ public class VRUISliderBehaviour : MonoBehaviour
             SetupSliderKnobPosition();
         }
         oldValue = currentValue;
+        gestureController = null;
+        gestureControllerToMonitor = null;
     }
 
     // Update is called once per frame
@@ -169,6 +171,7 @@ public class VRUISliderBehaviour : MonoBehaviour
         pathRenderer.startWidth = pathRenderer.endWidth = widthOfPath;
         pathRenderer.material = pathMaterial;
         pathRenderer.alignment = LineAlignment.TransformZ;
+        pathRenderer.generateLightingData = true;
     }
 
     private void SetupSliderKnobPosition()
