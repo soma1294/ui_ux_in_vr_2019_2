@@ -45,8 +45,11 @@ public class VRUIScrollPanelBehaviour : VRUIPanelBehaviour
     private void OnEnable()
     {
         base.FirstDrawPanel();
-        DisplayCorrectChildElements();
-        ArrangeElements();
+        if (transform.childCount > 0)
+        {
+            DisplayCorrectChildElements();
+            ArrangeElements();
+        }
     }
 
     // Start is called before the first frame update

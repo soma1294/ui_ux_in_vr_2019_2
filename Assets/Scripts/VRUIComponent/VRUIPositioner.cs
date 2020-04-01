@@ -34,7 +34,7 @@ public class VRUIPositioner : MonoBehaviour
     [HideInInspector]
     private bool vruiPositionerChangedTransform;
     [SerializeField]
-    //[HideInInspector]
+    [HideInInspector]
     private Transform parent;
     [SerializeField]
     [HideInInspector]
