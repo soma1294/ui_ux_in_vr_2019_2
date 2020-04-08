@@ -31,7 +31,7 @@ public class VRUIButtonBehaviour : MonoBehaviour
     private bool useGestureController = true;
     [SerializeField]
     [Tooltip("Choose here which gesture can activate this button.")]
-    private VRUIGesture gesture;
+    private VRUIGesture[] allowedGestures;
     private Material baseMaterial;
     [Header("Material")]
     [SerializeField]
@@ -75,9 +75,15 @@ public class VRUIButtonBehaviour : MonoBehaviour
     //Time value that is used to delay the positional return of the button to its start position
     private float waitTime;
 
+    private bool correctGesture = false;
     // Start is called before the first frame update
     void Start()
     {
+        if (allowedGestures.Length == 0)
+        {
+            allowedGestures = new VRUIGesture[1];
+            allowedGestures[0] = VRUIGesture.IndexPointing;
+        }
         //Get componentss
         BaseMaterial = PhysicalButton.GetComponent<Renderer>().material;
         VibrationBehaviour = GetComponent<VRUIVibration>();
@@ -189,7 +195,7 @@ public class VRUIButtonBehaviour : MonoBehaviour
         {
             if (!gestureController)
                 return;
-            if (gestureController.VRUIGesture != gesture)
+            if (!CorrectGestureUsed())
                 return;
         }
         touchingObjectTransform = other.transform;
@@ -197,27 +203,15 @@ public class VRUIButtonBehaviour : MonoBehaviour
         startTouchPosition = touchingObjectTransform.position;
         currentTouchPosition = touchingObjectTransform.position;
         buttonIsTouched = true;
-        //Vibration TODO: Why is this skipped?
-        if (VibrationBehaviour != null && !VibrationBehaviour.Equals(null) && (currentPosition == startPosition || waitTime > 0) && currentPosition.y < maxPushDistance)
+        if (VibrationBehaviour != null)
         {
-            VibrationBehaviour.Vibrate();
+            if ((currentPosition == startPosition || waitTime > 0) && currentPosition.y < maxPushDistance)
+            {
+                VibrationBehaviour.Vibrate();
+            }
         }
     }
-    /*
-    private void OnTriggerStay(Collider other)
-    {
-        VRUIGestureController gestureController = other.gameObject.GetComponent<VRUIGestureController>();
-        if (!gestureController)
-            return;
-        if (gestureController.VRUIGesture != VRUIGesture.IndexPointing)
-            return;
-        touchingObjectTransform = other.transform;
 
-        startTouchPosition = touchingObjectTransform.position;
-        currentTouchPosition = touchingObjectTransform.position;
-        buttonIsTouched = true;
-    }
-    */
     private void OnTriggerExit(Collider other)
     {
         if (useGestureController)
@@ -229,6 +223,19 @@ public class VRUIButtonBehaviour : MonoBehaviour
         touchingObjectTransform = null;
 
         buttonIsTouched = false;
+    }
+
+    private bool CorrectGestureUsed()
+    {
+        correctGesture = false;
+        foreach (VRUIGesture gesture in allowedGestures)
+        {
+            if (!correctGesture && gestureController.VRUIGesture == gesture)
+            {
+                correctGesture = true;
+            }
+        }
+        return correctGesture;
     }
 
     //TODO: besserer name, wie heisst dieses Konzept?

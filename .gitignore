@@ -60,3 +60,4 @@ crashlytics-build.properties
 
 # Sample scene
 /[Aa]ssets/[Ss]cenes/SampleScene.unity
+/[Aa]ssets/[Ss]cenes/SampleScene.unity.meta

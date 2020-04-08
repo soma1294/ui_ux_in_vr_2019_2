@@ -49,6 +49,22 @@ public class FakeHandController : MonoBehaviour
                     gestureController.VRUIGesture = 0;
                 }
             }
+            if (Input.GetKeyDown("0"))
+            {
+                gestureController.VRUIGesture = 0;
+            }
+            else if (Input.GetKeyDown("1"))
+            {
+                gestureController.VRUIGesture = (VRUIGesture)1;
+            }
+            else if (Input.GetKeyDown("2"))
+            {
+                gestureController.VRUIGesture = (VRUIGesture)2;
+            }
+            else if (Input.GetKeyDown("3"))
+            {
+                gestureController.VRUIGesture = (VRUIGesture)3;
+            }
         }
     }
 

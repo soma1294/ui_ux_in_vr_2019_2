@@ -67,12 +67,14 @@ public class VRUIScrollPanelBehaviour : VRUIPanelBehaviour
         if (scrollStepSize < 1)
             scrollStepSize = 1;
         //If a child was added reposition elements.
-        if (lastChildCount != transform.childCount)
+        //Debug.Log("if: lastChildCount = " + lastChildCount + ";childCount = " + transform.childCount);
+        if (transform.childCount > 0 && lastChildCount != transform.childCount)
         {
             DisplayCorrectChildElements();
             ArrangeElements();
         }
         lastChildCount = transform.childCount;
+        //Debug.Log("after if: childCount = " + transform.childCount);
     }
 
     public void ArrangeElements()
@@ -85,14 +87,11 @@ public class VRUIScrollPanelBehaviour : VRUIPanelBehaviour
             //The position of the first element is half the size of the panel plus half the size of one slice from the center of the panel.
             //firstElementPosition = transform.position - new Vector3((PanelSizeX/2) - (sliceSize / 2), 0f, zPositionOfChildren);
             firstElementPosition = transform.position - (transform.right * ((PanelSizeX / 2) - (sliceSize / 2))) - (transform.forward * zPositionOfChildren);
-            Debug.Log("firstElementPosition=" + firstElementPosition);
+            //Debug.Log("firstElementPosition=" + firstElementPosition);
             int i = 0;
             foreach (Transform child in transform)
             {
-                Vector3 childPosition = GetPositionOfChildElement(i, firstElementPosition, sliceSize);
-                Debug.Log("childPosition="+ childPosition);
-                child.position = childPosition;
-                //Debug.Log("ChildPosition=" + childPosition);
+                child.position = GetPositionOfChildElement(i, firstElementPosition, sliceSize);
                 i++;
             }
         } else if (layout == Layout.TopToBottom)
@@ -111,17 +110,32 @@ public class VRUIScrollPanelBehaviour : VRUIPanelBehaviour
         else
         {
             Debug.LogError("No layout chosen for VRUIScrollPanel! Layout was set to \"LeftToRight\"");
+            layout = Layout.LeftToRight;
         }
     }
 
     private float SliceSizeVertically()
     {
-        return PanelSizeX / maxDisplayedElements;
+        if (transform.childCount >= maxDisplayedElements)
+        {
+            return PanelSizeX / maxDisplayedElements;
+        }
+        else
+        {
+            return PanelSizeX / transform.childCount;
+        }
     }
 
     private float SliceSizeHorizontally()
     {
-        return PanelSizeY / maxDisplayedElements;
+        if (transform.childCount >= maxDisplayedElements)
+        {
+            return PanelSizeY / maxDisplayedElements;
+        }
+        else
+        {
+            return PanelSizeY / transform.childCount;
+        }
     }
 
     private Vector3 GetPositionOfChildElement(int child, Vector3 firstElementPosition, float sliceSize)
@@ -140,10 +154,19 @@ public class VRUIScrollPanelBehaviour : VRUIPanelBehaviour
         {
             child.gameObject.SetActive(false);
         }
-        //positionInList + maxDisplayedElements
-        for (int i = positionInList; i < (positionInList + maxDisplayedElements); i++)
+        if (maxDisplayedElements <= transform.childCount)
         {
-            transform.GetChild(i).gameObject.SetActive(true);
+            for (int i = positionInList; i < (positionInList + maxDisplayedElements); i++)
+            {
+                transform.GetChild(i).gameObject.SetActive(true);
+            }
+        } else
+        {
+            Debug.Log("Max Displayed Elements is greater than the amount of children of this VRUIScrollPanelBehaviour: " + name + "\nAll children will be displayed.");
+            for (int i = positionInList; i < (positionInList + transform.childCount); i++)
+            {
+                transform.GetChild(i).gameObject.SetActive(true);
+            }
         }
     }
 

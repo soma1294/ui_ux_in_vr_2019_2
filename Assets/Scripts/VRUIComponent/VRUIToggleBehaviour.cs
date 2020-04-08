@@ -34,8 +34,8 @@ public class VRUIToggleBehaviour : MonoBehaviour
              "If this is false, any trigger collider can interact with this toggle.")]
     private bool useGestureController = true;
     [SerializeField]
-    [Tooltip("Choose here which gesture can activate this toggle.")]
-    private VRUIGesture gesture;
+    [Tooltip("Choose here which gestures can activate this toggle.")]
+    private VRUIGesture[] allowedGestures;
     private Material baseMaterial;
     [Header("Material")]
     [SerializeField]
@@ -78,12 +78,18 @@ public class VRUIToggleBehaviour : MonoBehaviour
     private Vector3 currentTouchPosition;
     private Vector3 deltaTouchPosition;
     private VRUIGestureController gestureController;
+    private bool correctGesture = false;
     //Time value that is used to delay the positional return of the toggle to its start or stuck position
     private float waitTime;
 
     // Start is called before the first frame update
     void Start()
     {
+        if (allowedGestures.Length == 0)
+        {
+            allowedGestures = new VRUIGesture[1];
+            allowedGestures[0] = VRUIGesture.IndexPointing;
+        }
         //Get componentss
         BaseMaterial = PhysicalToggle.GetComponent<Renderer>().material;
         VibrationBehaviour = GetComponent<VRUIVibration>();
@@ -198,7 +204,7 @@ public class VRUIToggleBehaviour : MonoBehaviour
         {
             if (!gestureController)
                 return;
-            if (gestureController.VRUIGesture != gesture)
+            if (!CorrectGestureUsed())
                 return;
         }
         touchingObjectTransform = other.transform;
@@ -207,26 +213,28 @@ public class VRUIToggleBehaviour : MonoBehaviour
         currentTouchPosition = touchingObjectTransform.position;
         toggleIsTouched = true;
         //Vibration
-        if (currentPosition == startPosition || waitTime > 0 && currentPosition.y < maxPushDistance)
+        if (VibrationBehaviour != null)
         {
-            VibrationBehaviour.Vibrate();
+            if (currentPosition == startPosition || waitTime > 0 && currentPosition.y < maxPushDistance)
+            {
+                VibrationBehaviour.Vibrate();
+            }
         }
     }
-    /*
-    private void OnTriggerStay(Collider other)
-    {
-        VRUIGestureController gestureController = other.gameObject.GetComponent<VRUIGestureController>();
-        if (!gestureController)
-            return;
-        if (gestureController.VRUIGesture != VRUIGesture.IndexPointing)
-            return;
-        touchingObjectTransform = other.transform;
 
-        startTouchPosition = touchingObjectTransform.position;
-        currentTouchPosition = touchingObjectTransform.position;
-        toggleIsTouched = true;
+    private bool CorrectGestureUsed()
+    {
+        correctGesture = false;
+        foreach (VRUIGesture gesture in allowedGestures)
+        {
+            if (!correctGesture && gestureController.VRUIGesture == gesture)
+            {
+                correctGesture = true;
+            }
+        }
+        return correctGesture;
     }
-    */
+
     private void OnTriggerExit(Collider other)
     {
         if (useGestureController)
