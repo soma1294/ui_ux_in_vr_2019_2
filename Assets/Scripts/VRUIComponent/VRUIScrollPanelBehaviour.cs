@@ -17,6 +17,7 @@ public class VRUIScrollPanelBehaviour : VRUIPanelBehaviour
     [HideInInspector]
     [Tooltip("Defines how the child elements get arranged.")]
     private Layout layout = Layout.LeftToRight;
+    [Header("Scroll Settings")]
     [SerializeField]
     [Tooltip("Defines how many elements we scroll if StepForward() or StepBackward() gets called. Can't be higher than maxDisplayElements.")]
     private int scrollStepSize = 1;

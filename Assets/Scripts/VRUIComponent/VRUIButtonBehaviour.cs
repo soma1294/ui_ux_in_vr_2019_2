@@ -55,6 +55,7 @@ public class VRUIButtonBehaviour : MonoBehaviour
     private bool getVRUIButton;
     [SerializeField]
     private bool getVRUIButtonUp;
+    [Header("Assigned Objects")]
     [SerializeField]
     private GameObject physicalButton;
 

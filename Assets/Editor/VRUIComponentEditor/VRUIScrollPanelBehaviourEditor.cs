@@ -34,6 +34,8 @@ public class VRUIScrollPanelBehaviourEditor : Editor
         serializedObject.Update();
         base.OnInspectorGUI();
         DrawScrollPanelFields();
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Panel Dimensions", EditorStyles.boldLabel);
         DrawSizeFields();
         m_target = (VRUIScrollPanelBehaviour)target;
         

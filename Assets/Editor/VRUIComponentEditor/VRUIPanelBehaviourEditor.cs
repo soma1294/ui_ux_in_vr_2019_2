@@ -19,6 +19,8 @@ public class VRUIPanelBehaviourEditor : Editor
     {
         serializedObject.Update();
         base.OnInspectorGUI();
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Panel Dimensions", EditorStyles.boldLabel);
         DrawSizeFields();
         if (serializedObject.ApplyModifiedProperties())
         {

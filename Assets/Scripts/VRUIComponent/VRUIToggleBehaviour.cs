@@ -61,6 +61,7 @@ public class VRUIToggleBehaviour : MonoBehaviour
     private bool getVRUIToggleUp;
     [SerializeField]
     private bool toggleIsStuck;
+    [Header("Assigned Objects")]
     [SerializeField]
     private GameObject physicalToggle;
 

@@ -60,8 +60,8 @@ public class VRUISliderBehaviour : MonoBehaviour
     private GameObject physicalKnob;
     [System.Serializable]
     public class VRUISliderEvent : UnityEvent<float> { }
+    [Header("Unity Events")]
     [SerializeField]
-    [Space()]
     private VRUISliderEvent m_OnValueChanged = new VRUISliderEvent();
     public VRUISliderEvent onValueChanged
     {
@@ -145,6 +145,7 @@ public class VRUISliderBehaviour : MonoBehaviour
             }
             if (touchingObjectTransform)
             {
+                currentTouchPosition = touchingObjectTransform.position;
                 if (Vector3.Distance(touchingObjectTransform.position, PhysicalKnob.transform.position) > maxAllowedDistanceToMove)
                 {
                     InteractionFinished();
@@ -197,27 +198,23 @@ public class VRUISliderBehaviour : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (knobIsTouched)
+        if (knobIsTouched && !locked)
         {
             currentTouchPosition = touchingObjectTransform.position;
             deltaTouchPosition = currentTouchPosition - startTouchKnobPosition;
-            Vector3 localDeltaTouchPosition = PhysicalKnob.transform.InverseTransformDirection(currentTouchPosition) - PhysicalKnob.transform.InverseTransformDirection(startTouchKnobPosition);
 
-            Vector3 targetPosition;
+            Vector3 targetPosition = startTouchKnobPosition + deltaTouchPosition;
 
-            targetPosition.x = 0f;
-            targetPosition.y = PhysicalKnob.transform.localPosition.y + localDeltaTouchPosition.y;
-            targetPosition.z = zPositionKnob;
-
-            if (targetPosition.y >= endOfPath.y)
+            PhysicalKnob.transform.position = targetPosition;
+            PhysicalKnob.transform.localPosition = new Vector3(0, PhysicalKnob.transform.localPosition.y, zPositionKnob);
+            if (PhysicalKnob.transform.localPosition.y >= endOfPath.y)
             {
-                targetPosition = new Vector3(0f, endOfPath.y, zPositionKnob);
+                PhysicalKnob.transform.localPosition = new Vector3(0f, endOfPath.y, zPositionKnob);
             }
-            else if (targetPosition.y <= startOfPath.y)
+            else if (PhysicalKnob.transform.localPosition.y <= startOfPath.y)
             {
-                targetPosition = new Vector3(0f, startOfPath.y, zPositionKnob);
+                PhysicalKnob.transform.localPosition = new Vector3(0f, startOfPath.y, zPositionKnob);
             }
-            PhysicalKnob.transform.localPosition = Vector3.Lerp(PhysicalKnob.transform.localPosition, targetPosition, stifness);
         }
     }
 
@@ -285,14 +282,18 @@ public class VRUISliderBehaviour : MonoBehaviour
     public void AddValueToCurrentValue(float value)
     {
         float newValue = currentValue + value;
-        if (newValue >= maxValue) newValue = maxValue;
-        if (newValue <= minValue) newValue = minValue;
+        if (newValue >= maxValue)
+            newValue = maxValue;
+        if (newValue <= minValue)
+            newValue = minValue;
         UpdateKnobPosition();
     }
 
     private void OnTriggerEnter(Collider other)
     {
         //Debug.Log("TriggerEnterSlider: " + other.gameObject.name);
+        if (other.transform == touchingObjectTransform)
+            return;
         gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
         if (useGestureController)
         {
@@ -317,6 +318,8 @@ public class VRUISliderBehaviour : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         //Debug.Log("TriggerEnterSlider: " + other.gameObject.name);
+        if (other.transform == touchingObjectTransform)
+            return;
         gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
         if (useGestureController)
         {

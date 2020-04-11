@@ -8,12 +8,10 @@ using UnityEngine;
 public class VRUIPanelBehaviour : MonoBehaviour
 {
     [SerializeField]
-    [Tooltip("Sets the panels width.")]
     [Min(0)]
     [HideInInspector]
     private float panelSizeX;
     [SerializeField]
-    [Tooltip("Sets the panels height.")]
     [Min(0)]
     [HideInInspector]
     private float panelSizeY;
