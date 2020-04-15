@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(Rigidbody))]
+[ExecuteInEditMode]
 public class VRUIButtonBehaviour : MonoBehaviour
 {
     [Header("Interaction Settings")]
@@ -77,36 +78,51 @@ public class VRUIButtonBehaviour : MonoBehaviour
     private float waitTime;
 
     private bool correctGesture = false;
+
+    private Vector3 lastScale;
+
     // Start is called before the first frame update
     void Start()
     {
-        if (allowedGestures.Length == 0)
+        if (Application.isPlaying)
         {
-            allowedGestures = new VRUIGesture[1];
-            allowedGestures[0] = VRUIGesture.IndexPointing;
+            if (allowedGestures.Length == 0)
+            {
+                allowedGestures = new VRUIGesture[1];
+                allowedGestures[0] = VRUIGesture.IndexPointing;
+            }
+            //Get componentss
+            BaseMaterial = PhysicalButton.GetComponent<Renderer>().material;
+            VibrationBehaviour = GetComponent<VRUIVibration>();
+            meshRenderer = physicalButton.GetComponent<MeshRenderer>();
+            //The rigidbody should be kinematic and unaffected by gravity.
+            Rigidbody rBody = GetComponent<Rigidbody>();
+            rBody.isKinematic = true;
+            rBody.useGravity = false;
+            //Set default values of non inspector variables
+            startPosition = currentPosition = physicalButton.transform.localPosition;
+            deltaPosition = Vector3.zero;
+            getVRUIButtonDown = false;
+            getVRUIButtonUp = true;
+            gestureController = null;
         }
-        //Get componentss
-        BaseMaterial = PhysicalButton.GetComponent<Renderer>().material;
-        VibrationBehaviour = GetComponent<VRUIVibration>();
-        meshRenderer = physicalButton.GetComponent<MeshRenderer>();
-        //The rigidbody should be kinematic and unaffected by gravity.
-        Rigidbody rBody = GetComponent<Rigidbody>();
-        rBody.isKinematic = true;
-        rBody.useGravity = false;
-        //Set default values of non inspector variables
-        startPosition = currentPosition = physicalButton.transform.localPosition;
-        deltaPosition = Vector3.zero;
-        getVRUIButtonDown = false;
-        getVRUIButtonUp = true;
-        gestureController = null;
+    }
+
+    private void OnEnable()
+    {
+        lastScale = transform.localScale;
     }
 
     // Update is called once per frame
     void Update()
     {
-        UpdatePositionValues();
-        UpdateButtonStates();
-        FireButtonEvents();
+        transform.localScale = lastScale;
+        if (Application.isPlaying)
+        {
+            UpdatePositionValues();
+            UpdateButtonStates();
+            FireButtonEvents();
+        }
     }
 
     private void UpdatePositionValues()
@@ -151,6 +167,18 @@ public class VRUIButtonBehaviour : MonoBehaviour
 
     void FixedUpdate()
     {
+        //if the object that touches the button gets deactivated, reset the touching object references
+        if (touchingObjectTransform)
+        {
+            if (!touchingObjectTransform.gameObject.activeInHierarchy)
+            {
+                touchingObjectTransform = null;
+
+                startTouchPosition = Vector3.zero;
+                currentTouchPosition = Vector3.zero;
+                buttonIsTouched = false;
+            }
+        }
         //Move button according to the position of the finger/hand that touches it, if our maxPushDistance is bigger than 0.
         if (buttonIsTouched && maxPushDistance > 0)
         {

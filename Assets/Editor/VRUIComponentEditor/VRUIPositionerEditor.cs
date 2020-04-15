@@ -58,8 +58,24 @@ public class VRUIPositionerEditor : Editor
         relativeEulerRotationProp = serializedObject.FindProperty("relativeRotation");
         relativeEulerRotationProp = serializedObject.FindProperty("relativeEulerRotation");
         anchorProp = serializedObject.FindProperty("anchor");
+
+        VRUIScrollPanelBehaviour parentScrollPanel = null;
+        if (m_target.transform.parent)
+            parentScrollPanel = m_target.transform.parent.gameObject.GetComponent<VRUIScrollPanelBehaviour>();
+        if (parentScrollPanel)
+        {
+            Tools.hidden = true;
+            m_target.hideFlags = HideFlags.NotEditable;
+        }
         //anchorPositionProp = serializedObject.FindProperty("anchorPosition");
         //oldAnchorPosition = anchorPositionProp.vector3Value;
+    }
+
+    private void OnDisable()
+    {
+        Tools.hidden = false;
+        if(m_target != null)
+            m_target.hideFlags = HideFlags.None;
     }
 
     public override void OnInspectorGUI()

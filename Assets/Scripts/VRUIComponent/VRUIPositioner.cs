@@ -51,66 +51,107 @@ public class VRUIPositioner : MonoBehaviour
     private MeshFilter parentMeshFilter;
     private VRUIScrollPanelBehaviour scrollPanelBehaviour;
 
+    private Vector3 lastPosition;
+
+    private void OnEnable()
+    {
+        if (!Application.isPlaying)
+        {
+            parent = transform.parent ? transform.parent : null;
+            lastParent = parent;
+
+            if (parent)
+            {
+                parentPanel = transform.parent.gameObject.GetComponent<VRUIPanelBehaviour>();
+                parentMeshFilter = transform.parent.gameObject.GetComponent<MeshFilter>();
+                scrollPanelBehaviour = parent.GetComponent<VRUIScrollPanelBehaviour>();
+                lastParentRotationValue = transform.parent.rotation;
+            }
+
+            vruiPositionerChangedTransform = false;
+
+            if (HasParentVRUIPositioner())
+                SetupAnchor();
+            SetPositionRelativeToAnchor();
+            //SetRotationRelativeToParent();
+            lastPosition = transform.position;
+        }
+    }
+
     private void Reset()
     {
-        parent = transform.parent ? transform.parent : null;
-        lastParent = parent;
-
-        parentPanel = null;
-        parentMeshFilter = null;
-
-        if (parent)
+        if (!Application.isPlaying)
         {
-            parentPanel = transform.parent.gameObject.GetComponent<VRUIPanelBehaviour>();
-            parentMeshFilter = transform.parent.gameObject.GetComponent<MeshFilter>();
-            scrollPanelBehaviour = parent.GetComponent<VRUIScrollPanelBehaviour>();
-            lastParentRotationValue = transform.parent.rotation;
-        }
-        
-        RelativePosition = Vector3.zero;
-        RelativeRotation = Quaternion.identity;
-        Anchor = VRUIAnchor.MiddleCenter;
-        anchorPosition = Vector3.zero;
-        oldAnchor = VRUIAnchor.MiddleCenter;
-        vruiPositionerChangedTransform = false;
-            
-        transform.rotation = Quaternion.identity;
+            parent = transform.parent ? transform.parent : null;
+            lastParent = parent;
 
-        if (HasParentVRUIPositioner())
-            SetupAnchor();
-        SetPositionRelativeToAnchor();
-        SetRotationRelativeToParent();
+            parentPanel = null;
+            parentMeshFilter = null;
+
+            if (parent)
+            {
+                parentPanel = transform.parent.gameObject.GetComponent<VRUIPanelBehaviour>();
+                parentMeshFilter = transform.parent.gameObject.GetComponent<MeshFilter>();
+                scrollPanelBehaviour = parent.GetComponent<VRUIScrollPanelBehaviour>();
+                lastParentRotationValue = transform.parent.rotation;
+            }
+
+            RelativePosition = Vector3.zero;
+            RelativeRotation = Quaternion.identity;
+            Anchor = VRUIAnchor.MiddleCenter;
+            anchorPosition = Vector3.zero;
+            oldAnchor = VRUIAnchor.MiddleCenter;
+            vruiPositionerChangedTransform = false;
+
+            transform.rotation = Quaternion.identity;
+
+            if (HasParentVRUIPositioner())
+                SetupAnchor();
+            SetPositionRelativeToAnchor();
+            SetRotationRelativeToParent();
+            lastPosition = transform.position;
+        }
     }
 
     private void Update()
     {
-        //If the parent has a VRUIScrollPanelBehaviour, this script shouldnt control the objects position
-        if (!Application.isPlaying && !scrollPanelBehaviour) {
-            //Debug.Log("vruiPositionerChangedTransform=" + vruiPositionerChangedTransform + ";transform.hasChanged=" + transform.hasChanged + ";name=" + name);
-            if (VRUIPositionerChangedTransform)
+        if (!Application.isPlaying)
+        {
+            //If the parent has a VRUIScrollPanelBehaviour, this script shouldnt control the objects position
+            if (!scrollPanelBehaviour && HasParentVRUIPositioner())
             {
-                HaveToUpdateRelativeValues = false;
-            } else if (transform.hasChanged)
-            {
-                HaveToUpdateRelativeValues = true;
+                //Debug.Log("vruiPositionerChangedTransform=" + vruiPositionerChangedTransform + ";transform.hasChanged=" + transform.hasChanged + ";name=" + name);
+                if (VRUIPositionerChangedTransform)
+                {
+                    HaveToUpdateRelativeValues = false;
+                }
+                else if (transform.hasChanged)
+                {
+                    HaveToUpdateRelativeValues = true;
+                }
+                parent = transform.parent ? transform.parent : null;
+                //If the parent changed recalculate the anchorposition and reposition object.
+                if (parent && lastParent != parent)
+                {
+                    SetupAnchor();
+                    SetPositionRelativeToAnchor();
+                    //SetRotationRelativeToParent();
+                }
+                //If rotation changed recalculate the anchorposition
+                if (parent && lastParentRotationValue != transform.parent.rotation)
+                {
+                    SetupAnchor();
+                }
+                lastParent = parent;
+                lastParentRotationValue = transform.rotation;
+                transform.hasChanged = false;
+                VRUIPositionerChangedTransform = false;
             }
-            parent = transform.parent ? transform.parent : null;
-            //If the parent changed recalculate the anchorposition and reposition object.
-            if (parent && lastParent != parent)
+            if (scrollPanelBehaviour && lastPosition != transform.position)
             {
-                SetupAnchor();
-                SetPositionRelativeToAnchor();
-                //SetRotationRelativeToParent();
+                scrollPanelBehaviour.DisplayCorrectChildElements();
+                scrollPanelBehaviour.ArrangeElements();
             }
-            //If rotation changed recalculate the anchorposition
-            if (parent && lastParentRotationValue != transform.parent.rotation)
-            {
-                SetupAnchor();
-            }
-            lastParent = parent;
-            lastParentRotationValue = transform.rotation;
-            transform.hasChanged = false;
-            VRUIPositionerChangedTransform = false;
         }
     }
 
@@ -184,7 +225,8 @@ public class VRUIPositioner : MonoBehaviour
 
     public void SetPositionRelativeToAnchor()
     {
-        transform.position = (transform.right * RelativePosition.x) + (transform.up * RelativePosition.y) + (transform.forward * RelativePosition.z) + AnchorPosition;
+        //transform.position = (transform.right * RelativePosition.x) + (transform.up * RelativePosition.y) + (transform.forward * RelativePosition.z) + AnchorPosition;
+        transform.position = AnchorPosition + RelativePosition;
         VRUIPositionerChangedTransform = true;
         //transform.hasChanged = false;
     }

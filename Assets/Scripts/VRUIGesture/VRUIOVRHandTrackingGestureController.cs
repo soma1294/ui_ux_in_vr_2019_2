@@ -29,25 +29,34 @@ public class VRUIOVRHandTrackingGestureController : VRUIGestureController
             if (pinchStrength >= minPinchStrength)
             {
                 VRUIGesture = VRUIGesture.Pinch;
-                foreach (Collider collider in collidersToDeactivateOnPinch)
+                if (collidersToDeactivateOnPinch.Length > 0)
                 {
-                    collider.enabled = false;
+                    foreach (Collider collider in collidersToDeactivateOnPinch)
+                    {
+                        collider.enabled = false;
+                    }
                 }
             }
             else if (indexFingerPointingConfidence == OVRHand.TrackingConfidence.High && pinchStrength < minPinchStrength)
             {
                 VRUIGesture = VRUIGesture.IndexPointing;
-                foreach (Collider collider in collidersToDeactivateOnPinch)
+                if (collidersToDeactivateOnPinch.Length > 0)
                 {
-                    collider.enabled = true;
+                    foreach (Collider collider in collidersToDeactivateOnPinch)
+                    {
+                        collider.enabled = true;
+                    }
                 }
             }
             else
             {
                 VRUIGesture = VRUIGesture.None;
-                foreach (Collider collider in collidersToDeactivateOnPinch)
+                if (collidersToDeactivateOnPinch.Length > 0)
                 {
-                    collider.enabled = true;
+                    foreach (Collider collider in collidersToDeactivateOnPinch)
+                    {
+                        collider.enabled = true;
+                    }
                 }
             }
         }

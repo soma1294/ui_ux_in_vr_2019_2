@@ -133,7 +133,7 @@ LineRenderer:
     alignment: 1
     textureMode: 0
     shadowBias: 0.5
-    generateLightingData: 0
+    generateLightingData: 1
   m_UseWorldSpace: 0
   m_Loop: 0
 --- !u!1 &2698538940160201712
@@ -226,16 +226,21 @@ MonoBehaviour:
   minValue: 0
   maxValue: 100
   startValue: 0
+  currentValue: 0
   lengthOfPath: 1
   widthOfPath: 0.05
-  currentValue: 0
   zPositionKnob: -0.025
-  stifness: 0.5
+  maxAllowedDistanceToMove: 0.1
   useGestureController: 1
-  gesture: 0
+  allowedGestures: 00000000
+  lockoutTime: 1
   pathMaterial: {fileID: 2100000, guid: 8c32ffb4320d5f0408b3c96fc1bee76f, type: 2}
+  knobTouchedMaterial: {fileID: 2100000, guid: 7d721f2301ca41b46b035aa5b2522697, type: 2}
   path: {fileID: 2698538939886695214}
   physicalKnob: {fileID: 2698538940427738533}
+  m_OnValueChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &2698538940427738533
 GameObject:
   m_ObjectHideFlags: 0
@@ -307,7 +312,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

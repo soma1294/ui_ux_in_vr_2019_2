@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 //TODO: Improve VRUIToggle. Maybe dont use VRUIButton as template.
 [RequireComponent(typeof(Rigidbody))]
+[ExecuteInEditMode]
 public class VRUIToggleBehaviour : MonoBehaviour
 {
     [Header("Interaction Settings")]
@@ -83,35 +84,49 @@ public class VRUIToggleBehaviour : MonoBehaviour
     //Time value that is used to delay the positional return of the toggle to its start or stuck position
     private float waitTime;
 
+    private Vector3 lastScale;
+
     // Start is called before the first frame update
     void Start()
     {
-        if (allowedGestures.Length == 0)
+        if (Application.isPlaying)
         {
-            allowedGestures = new VRUIGesture[1];
-            allowedGestures[0] = VRUIGesture.IndexPointing;
+            if (allowedGestures.Length == 0)
+            {
+                allowedGestures = new VRUIGesture[1];
+                allowedGestures[0] = VRUIGesture.IndexPointing;
+            }
+            //Get componentss
+            BaseMaterial = PhysicalToggle.GetComponent<Renderer>().material;
+            VibrationBehaviour = GetComponent<VRUIVibration>();
+            meshRenderer = physicalToggle.GetComponent<MeshRenderer>();
+            //The rigidbody should be kinematic and unaffected by gravity.
+            Rigidbody rBody = GetComponent<Rigidbody>();
+            rBody.isKinematic = true;
+            rBody.useGravity = false;
+            //Set default values of non inspector variables
+            startPosition = currentPosition = physicalToggle.transform.localPosition;
+            deltaPosition = Vector3.zero;
+            getVRUIToggleDown = false;
+            getVRUIToggleUp = true;
         }
-        //Get componentss
-        BaseMaterial = PhysicalToggle.GetComponent<Renderer>().material;
-        VibrationBehaviour = GetComponent<VRUIVibration>();
-        meshRenderer = physicalToggle.GetComponent<MeshRenderer>();
-        //The rigidbody should be kinematic and unaffected by gravity.
-        Rigidbody rBody = GetComponent<Rigidbody>();
-        rBody.isKinematic = true;
-        rBody.useGravity = false;
-        //Set default values of non inspector variables
-        startPosition = currentPosition = physicalToggle.transform.localPosition;
-        deltaPosition = Vector3.zero;
-        getVRUIToggleDown = false;
-        getVRUIToggleUp = true;
+    }
+
+    private void OnEnable()
+    {
+        lastScale = transform.localScale;
     }
 
     // Update is called once per frame
     void Update()
     {
-        UpdatePositionValues();
-        UpdateToggleStates();
-        FireToggleEvents();
+        transform.localScale = lastScale;
+        if (Application.isPlaying)
+        {
+            UpdatePositionValues();
+            UpdateToggleStates();
+            FireToggleEvents();
+        }
     }
 
     private void UpdatePositionValues()
@@ -154,6 +169,18 @@ public class VRUIToggleBehaviour : MonoBehaviour
 
     void FixedUpdate()
     {
+        //if the object that touches the toggle gets deactivated, reset the touching object references
+        if (touchingObjectTransform)
+        {
+            if (!touchingObjectTransform.gameObject.activeInHierarchy)
+            {
+                touchingObjectTransform = null;
+
+                startTouchPosition = Vector3.zero;
+                currentTouchPosition = Vector3.zero;
+                toggleIsTouched = false;
+            }
+        }
         //Move toggle according to the position of the finger/hand that touches it, if our maxPushDistance is bigger than 0.
         if (toggleIsTouched && maxPushDistance > 0)
         {

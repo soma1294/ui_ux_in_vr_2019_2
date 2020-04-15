@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class ConsoleOutputBehaviour : MonoBehaviour
+public class ConsoleOutputBehaviourTest : MonoBehaviour
 {
     public VRUISliderBehaviour slider;
 

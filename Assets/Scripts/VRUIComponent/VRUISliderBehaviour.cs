@@ -32,9 +32,10 @@ public class VRUISliderBehaviour : MonoBehaviour
     [Tooltip("The z-position of the knob, relative to the path.")]
     float zPositionKnob = -0.025f;
     [Header("Interaction Settings")]
-    [SerializeField]
-    [Tooltip("How fast the knob adjusts its position. 0 means it never reaches the new position, 1 it reaches it almost instantly.")]
-    private float stifness = 0.5f;
+    //TODO: is stifness still necessary?
+    //[SerializeField]
+    //[Tooltip("How fast the knob adjusts its position. 0 means it never reaches the new position, 1 it reaches it almost instantly.")]
+    //private float stifness = 0.5f;
     [SerializeField]
     [Tooltip("If the object/hand that touches the knob is farther away than this, the knob wont be moved.")]
     private float maxAllowedDistanceToMove = 0.2f;
@@ -52,6 +53,10 @@ public class VRUISliderBehaviour : MonoBehaviour
     [SerializeField]
     [Tooltip("The material used to render the path.")]
     private Material pathMaterial;
+    [SerializeField]
+    [Tooltip("The color of the knob when touched.")]
+    private Material knobTouchedMaterial;
+    private Material baseMaterial;
     private VRUIVibration vibrationBehaviour;
     [Header("Assigned Objects")]
     [SerializeField]
@@ -88,6 +93,11 @@ public class VRUISliderBehaviour : MonoBehaviour
 
     private bool locked = false;
     private float currentLockoutTime = 0;
+
+    private MeshRenderer knobRenderer;
+
+    private Vector3 lastScale;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -107,13 +117,22 @@ public class VRUISliderBehaviour : MonoBehaviour
         oldValue = currentValue;
         gestureController = null;
         gestureControllerToMonitor = null;
+        if (Application.isPlaying)
+        {
+            knobRenderer = PhysicalKnob.GetComponent<MeshRenderer>();
+            baseMaterial = knobRenderer.material;
+        }
+    }
+
+    private void OnEnable()
+    {
+        lastScale = transform.localScale;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //if(gestureControllerToMonitor)
-          //  Debug.Log("toMonitor=" + gestureControllerToMonitor);
+        transform.localScale = lastScale;
         startOfPath = new Vector3(0.0f, -lengthOfPath / 2, 0.0f);
         endOfPath = new Vector3(0.0f, lengthOfPath / 2, 0.0f);
         if (path && physicalKnob)
@@ -159,6 +178,14 @@ public class VRUISliderBehaviour : MonoBehaviour
                 m_OnValueChanged.Invoke(CurrentValue);
             }
             oldValue = currentValue;
+            if (knobIsTouched)
+            {
+                knobRenderer.material = knobTouchedMaterial;
+            }
+            else
+            {
+                knobRenderer.material = baseMaterial;
+            }
         }
     }
 
@@ -198,6 +225,22 @@ public class VRUISliderBehaviour : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (touchingObjectTransform)
+        {
+            //if the object that touches the knob gets deactivated, reset the touching object references
+            if (!touchingObjectTransform.gameObject.activeInHierarchy)
+            {
+                touchingObjectTransform = null;
+
+                startTouchPosition = Vector3.zero;
+                startTouchKnobPosition = Vector3.zero;
+                currentTouchPosition = Vector3.zero;
+
+                gestureControllerToMonitor = null;
+
+                knobIsTouched = false;
+            }
+        }
         if (knobIsTouched && !locked)
         {
             currentTouchPosition = touchingObjectTransform.position;

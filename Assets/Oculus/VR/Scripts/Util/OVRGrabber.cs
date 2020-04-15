@@ -23,6 +23,8 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class OVRGrabber : MonoBehaviour
 {
+    public bool useHandtracking;
+    public OVRHand hand;
     // Grip trigger thresholds for picking up objects, with some hysteresis.
     public float grabBegin = 0.55f;
     public float grabEnd = 0.35f;
@@ -173,8 +175,15 @@ public class OVRGrabber : MonoBehaviour
         m_lastRot = transform.rotation;
 
 		float prevFlex = m_prevFlex;
-		// Update values from inputs
-		m_prevFlex = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, m_controller);
+        if (useHandtracking)
+        {
+            m_prevFlex = Mathf.Max(hand.GetFingerPinchStrength(OVRHand.HandFinger.Index), hand.GetFingerPinchStrength(OVRHand.HandFinger.Middle), hand.GetFingerPinchStrength(OVRHand.HandFinger.Ring), hand.GetFingerPinchStrength(OVRHand.HandFinger.Pinky));
+        }
+        else
+        {
+            // Update values from inputs
+            m_prevFlex = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, m_controller);
+        }
 
 		CheckForGrabOrRelease(prevFlex);
     }
@@ -251,10 +260,14 @@ public class OVRGrabber : MonoBehaviour
 
             for (int j = 0; j < grabbable.grabPoints.Length; ++j)
             {
+                Debug.Log("Msg: 1");
                 Collider grabbableCollider = grabbable.grabPoints[j];
                 // Store the closest grabbable
+                Debug.Log("Msg: 2");
                 Vector3 closestPointOnBounds = grabbableCollider.ClosestPointOnBounds(m_gripTransform.position);
+                Debug.Log("Msg: 3");
                 float grabbableMagSq = (m_gripTransform.position - closestPointOnBounds).sqrMagnitude;
+                
                 if (grabbableMagSq < closestMagSq)
                 {
                     closestMagSq = grabbableMagSq;
@@ -287,7 +300,7 @@ public class OVRGrabber : MonoBehaviour
                 if(m_grabbedObj.snapOffset)
                 {
                     Vector3 snapOffset = m_grabbedObj.snapOffset.position;
-                    if (m_controller == OVRInput.Controller.LTouch) snapOffset.x = -snapOffset.x;
+                    if (m_controller == OVRInput.Controller.LTouch || m_controller == OVRInput.Controller.LHand) snapOffset.x = -snapOffset.x;
                     m_grabbedObjectPosOff += snapOffset;
                 }
             }
@@ -351,8 +364,18 @@ public class OVRGrabber : MonoBehaviour
     {
         if (m_grabbedObj != null)
         {
-			OVRPose localPose = new OVRPose { position = OVRInput.GetLocalControllerPosition(m_controller), orientation = OVRInput.GetLocalControllerRotation(m_controller) };
-            OVRPose offsetPose = new OVRPose { position = m_anchorOffsetPosition, orientation = m_anchorOffsetRotation };
+            OVRPose localPose;
+            OVRPose offsetPose;
+            if (useHandtracking)
+            {
+                localPose = new OVRPose { position = hand.transform.position, orientation = hand.transform.rotation};
+                offsetPose = new OVRPose { position = m_anchorOffsetPosition, orientation = m_anchorOffsetRotation };
+            }
+            else
+            {
+                localPose = new OVRPose { position = OVRInput.GetLocalControllerPosition(m_controller), orientation = OVRInput.GetLocalControllerRotation(m_controller) };
+                offsetPose = new OVRPose { position = m_anchorOffsetPosition, orientation = m_anchorOffsetRotation };
+            }
             localPose = localPose * offsetPose;
 
 			OVRPose trackingSpace = transform.ToOVRPose() * localPose.Inverse();

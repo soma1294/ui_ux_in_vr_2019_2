@@ -22,17 +22,28 @@ public class VRUIPanelBehaviour : MonoBehaviour
 
     private VRUIPositioner vruiPositioner;
 
+    private Vector3 lastScale;
+
     private void OnEnable()
     {
         FirstDrawPanel();
+        lastScale = transform.localScale;
+    }
+
+    private void Update()
+    {
+        transform.localScale = lastScale;
     }
 
     void Reset()
     {
-        vruiPositioner = null;
-        PanelSizeX = 1;
-        PanelSizeY = 1;
-        RedrawPanel();
+        if (!Application.isPlaying)
+        {
+            vruiPositioner = null;
+            PanelSizeX = 1;
+            PanelSizeY = 1;
+            RedrawPanel();
+        }
         //On undo, we want to Redraw the panel to make sure it has the correct size.
         //Undo.undoRedoPerformed -= RedrawPanel;
         //Undo.undoRedoPerformed += RedrawPanel;
@@ -176,15 +187,19 @@ public class VRUIPanelBehaviour : MonoBehaviour
         meshBack.vertices = boundaryVertices;
         meshBack.triangles = trianglesBack;
         meshBack.RecalculateNormals();
-        
+
         //Save all relevant data before we set the position to the worlds origin point
         //This is important for the combination of the meshes
-        Vector3 scale = transform.localScale;
+        //Vector3 scale = transform.localScale;
+        Transform parent = transform.parent;
+        Vector3 scale = transform.lossyScale;
         Quaternion rot = transform.rotation;
         Vector3 pos = transform.position;
         Matrix4x4 myTransform = transform.worldToLocalMatrix;
 
         //Set the transform to the origin of the world
+        //transform.localScale = Vector3.one;
+        transform.SetParent(null);
         transform.localScale = Vector3.one;
         transform.rotation = Quaternion.identity;
         transform.position = Vector3.zero;
@@ -206,6 +221,7 @@ public class VRUIPanelBehaviour : MonoBehaviour
         transform.localScale = scale;
         transform.rotation = rot;
         transform.position = pos;
+        transform.SetParent(parent);
 
         //The anchors now need to be repositioned TODO: Beste Methode?
         foreach (Transform child in transform)
@@ -214,7 +230,7 @@ public class VRUIPanelBehaviour : MonoBehaviour
             if (positioner)
             {
                 positioner.SetupAnchor();
-                positioner.SetRotationRelativeToParent();
+                //positioner.SetRotationRelativeToParent();
                 positioner.SetPositionRelativeToAnchor();
             }
         }
