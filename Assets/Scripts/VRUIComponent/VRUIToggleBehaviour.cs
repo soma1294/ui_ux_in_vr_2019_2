@@ -227,9 +227,12 @@ public class VRUIToggleBehaviour : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
         if (useGestureController)
         {
+            if (other.attachedRigidbody)
+                gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
+            else
+                return;
             if (!gestureController)
                 return;
             if (!CorrectGestureUsed())
@@ -267,6 +270,10 @@ public class VRUIToggleBehaviour : MonoBehaviour
     {
         if (useGestureController)
         {
+            if (other.attachedRigidbody)
+                gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
+            else
+                return;
             gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
             if (!gestureController)
                 return;

@@ -405,6 +405,10 @@ public class VRUISliderBehaviour : MonoBehaviour
     private bool GestureChanged()
     {
         //Debug.Log("gesture=" + gestureControllerToMonitor.VRUIGesture + ";lastgesture=" + lastGesture);
+        if (!gestureControllerToMonitor)
+        {
+            return true;
+        }
         if (lastGesture != VRUIGesture.None && gestureControllerToMonitor.VRUIGesture != lastGesture)
         {
             lastGesture = gestureControllerToMonitor.VRUIGesture;

@@ -219,9 +219,12 @@ public class VRUIButtonBehaviour : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
         if (useGestureController)
         {
+            if (other.attachedRigidbody)
+                gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
+            else
+                return;
             if (!gestureController)
                 return;
             if (!CorrectGestureUsed())
@@ -245,12 +248,14 @@ public class VRUIButtonBehaviour : MonoBehaviour
     {
         if (useGestureController)
         {
-            gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
+            if (other.attachedRigidbody)
+                gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
+            else
+                return;
             if (!gestureController)
                 return;
         }
         touchingObjectTransform = null;
-
         buttonIsTouched = false;
     }
 

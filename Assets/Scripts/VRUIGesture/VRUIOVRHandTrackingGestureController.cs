@@ -8,7 +8,11 @@ public class VRUIOVRHandTrackingGestureController : VRUIGestureController
 
     private bool handTracking;
 
+    public bool deactivateThumbColliderOnPointing;
+    public Collider thumbCollider;
+
     public float minPinchStrength;
+    public float maxPinchStrengthForPointing;
     public Collider[] collidersToDeactivateOnPinch;
 
     // Start is called before the first frame update
@@ -26,9 +30,14 @@ public class VRUIOVRHandTrackingGestureController : VRUIGestureController
         {
             OVRHand.TrackingConfidence indexFingerPointingConfidence = ovrHand.GetFingerConfidence(OVRHand.HandFinger.Index);
             float pinchStrength = ovrHand.GetFingerPinchStrength(OVRHand.HandFinger.Index);
+            //Pinch Gesture
             if (pinchStrength >= minPinchStrength)
             {
                 VRUIGesture = VRUIGesture.Pinch;
+                if (deactivateThumbColliderOnPointing)
+                {
+                    thumbCollider.enabled = true;
+                }
                 if (collidersToDeactivateOnPinch.Length > 0)
                 {
                     foreach (Collider collider in collidersToDeactivateOnPinch)
@@ -37,9 +46,14 @@ public class VRUIOVRHandTrackingGestureController : VRUIGestureController
                     }
                 }
             }
-            else if (indexFingerPointingConfidence == OVRHand.TrackingConfidence.High && pinchStrength < minPinchStrength)
+            //Pointing Gesture
+            else if (indexFingerPointingConfidence == OVRHand.TrackingConfidence.High && pinchStrength < maxPinchStrengthForPointing)
             {
                 VRUIGesture = VRUIGesture.IndexPointing;
+                if (deactivateThumbColliderOnPointing)
+                {
+                    thumbCollider.enabled = false;
+                }
                 if (collidersToDeactivateOnPinch.Length > 0)
                 {
                     foreach (Collider collider in collidersToDeactivateOnPinch)
@@ -51,6 +65,10 @@ public class VRUIOVRHandTrackingGestureController : VRUIGestureController
             else
             {
                 VRUIGesture = VRUIGesture.None;
+                if (deactivateThumbColliderOnPointing)
+                {
+                    thumbCollider.enabled = true;
+                }
                 if (collidersToDeactivateOnPinch.Length > 0)
                 {
                     foreach (Collider collider in collidersToDeactivateOnPinch)

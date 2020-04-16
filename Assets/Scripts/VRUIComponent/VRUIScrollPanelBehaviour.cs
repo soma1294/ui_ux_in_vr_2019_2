@@ -69,7 +69,15 @@ public class VRUIScrollPanelBehaviour : VRUIPanelBehaviour
             scrollStepSize = 1;
         //If a child was added reposition elements.
         //Debug.Log("if: lastChildCount = " + lastChildCount + ";childCount = " + transform.childCount);
-        if (transform.childCount > 0 && lastChildCount != transform.childCount)
+        if (Application.isPlaying)
+        {
+            if (transform.childCount > 0 && lastChildCount != transform.childCount)
+            {
+                DisplayCorrectChildElements();
+                ArrangeElements();
+            }
+        }
+        else
         {
             DisplayCorrectChildElements();
             ArrangeElements();

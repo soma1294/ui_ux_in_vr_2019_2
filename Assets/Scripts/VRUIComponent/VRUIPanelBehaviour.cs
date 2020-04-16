@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//using UnityEditor;
+using UnityEditor;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 [ExecuteInEditMode]
@@ -24,10 +24,24 @@ public class VRUIPanelBehaviour : MonoBehaviour
 
     private Vector3 lastScale;
 
+    private Vector2 lastPanelSize;
+
     private void OnEnable()
     {
         FirstDrawPanel();
         lastScale = transform.localScale;
+#if UNITY_EDITOR
+        Undo.undoRedoPerformed -= UndoPanel;
+        Undo.undoRedoPerformed += UndoPanel;
+#endif
+    }
+
+    private void UndoPanel()
+    {
+        if (lastPanelSize.x != PanelSizeX || lastPanelSize.y != PanelSizeY)
+        {
+            RedrawPanel();
+        }
     }
 
     private void Update()
@@ -51,12 +65,15 @@ public class VRUIPanelBehaviour : MonoBehaviour
 
     private void OnDestroy()
     {
+#if UNITY_EDITOR
         //Remove our fuction from the delegate when this Monobehaviour is destroyed
-        //Undo.undoRedoPerformed -= RedrawPanel;
+        Undo.undoRedoPerformed -= UndoPanel;
+#endif
     }
 
     protected void FirstDrawPanel()
     {
+        lastPanelSize = new Vector2(PanelSizeX, PanelSizeY);
         //TODO: Check if it still leaks when this if is not executing
         if (Application.isPlaying)
         {
@@ -139,6 +156,7 @@ public class VRUIPanelBehaviour : MonoBehaviour
 
     public void RedrawPanel()
     {
+        lastPanelSize = new Vector2(PanelSizeX, PanelSizeY);
         //TODO: Check if it still leaks when this if is not executing
         if (Application.isPlaying)
         {

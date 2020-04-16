@@ -76,6 +76,38 @@ public class VRUIPositioner : MonoBehaviour
             //SetRotationRelativeToParent();
             lastPosition = transform.position;
         }
+#if UNITY_EDITOR
+        Undo.undoRedoPerformed -= UndoPositioner;
+        Undo.undoRedoPerformed += UndoPositioner;
+#endif
+    }
+
+    private void UndoPositioner()
+    {
+        if (transform.position != (AnchorPosition + RelativePosition))
+        {
+            SetPositionRelativeToAnchor();
+        }
+        /*
+        if (transform.parent)
+        {
+            if (transform.rotation != transform.parent.rotation * Quaternion.Euler(RelativeEulerRotation))
+            {
+                SetRotationRelativeToParent();
+            }
+        }
+        else if(transform.rotation != Quaternion.Euler(RelativeEulerRotation))
+        {
+            SetRotationRelativeToParent();
+        }
+        */
+    }
+
+    private void OnDestroy()
+    {
+#if UNITY_EDITOR
+        Undo.undoRedoPerformed -= UndoPositioner;
+#endif
     }
 
     private void Reset()
@@ -118,7 +150,7 @@ public class VRUIPositioner : MonoBehaviour
         if (!Application.isPlaying)
         {
             //If the parent has a VRUIScrollPanelBehaviour, this script shouldnt control the objects position
-            if (!scrollPanelBehaviour && HasParentVRUIPositioner())
+            if (!scrollPanelBehaviour)
             {
                 //Debug.Log("vruiPositionerChangedTransform=" + vruiPositionerChangedTransform + ";transform.hasChanged=" + transform.hasChanged + ";name=" + name);
                 if (VRUIPositionerChangedTransform)
