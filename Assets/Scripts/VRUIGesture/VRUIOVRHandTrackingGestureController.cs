@@ -1,7 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/********************************************************************************//*
+Created as part of a Bsc in Computer Science for the BFH Biel
+Created by:   Steven Henz
+Date:         26.05.20
+Email:        steven.henz93@gmail.com
+************************************************************************************/
 using UnityEngine;
 
+/// <summary>
+/// Demonstrates how the VRUIGestureController class can be implemented to recognize gestures. Specifically made for the Oculus Quest for both controllers
+/// and handtracking.
+/// </summary>
 public class VRUIOVRHandTrackingGestureController : VRUIGestureController
 {
     private OVRHand ovrHand;
@@ -11,9 +19,13 @@ public class VRUIOVRHandTrackingGestureController : VRUIGestureController
     public bool deactivateThumbColliderOnPointing;
     public Collider thumbCollider;
 
+    public bool deactivateGrabColliderOnPointing;
+    public Collider grabCollider;
+
     public float minPinchStrength;
     public float maxPinchStrengthForPointing;
     public Collider[] collidersToDeactivateOnPinch;
+    public Collider[] collidersToDeactivateOnPointing;
 
     // Start is called before the first frame update
     void Start()
@@ -38,11 +50,22 @@ public class VRUIOVRHandTrackingGestureController : VRUIGestureController
                 {
                     thumbCollider.enabled = true;
                 }
+                if (deactivateGrabColliderOnPointing)
+                {
+                    grabCollider.enabled = true;
+                }
                 if (collidersToDeactivateOnPinch.Length > 0)
                 {
                     foreach (Collider collider in collidersToDeactivateOnPinch)
                     {
                         collider.enabled = false;
+                    }
+                }
+                if (collidersToDeactivateOnPointing.Length > 0)
+                {
+                    foreach (Collider collider in collidersToDeactivateOnPointing)
+                    {
+                        collider.enabled = true;
                     }
                 }
             }
@@ -54,11 +77,22 @@ public class VRUIOVRHandTrackingGestureController : VRUIGestureController
                 {
                     thumbCollider.enabled = false;
                 }
+                if (deactivateGrabColliderOnPointing)
+                {
+                    grabCollider.enabled = false;
+                }
                 if (collidersToDeactivateOnPinch.Length > 0)
                 {
                     foreach (Collider collider in collidersToDeactivateOnPinch)
                     {
                         collider.enabled = true;
+                    }
+                }
+                if (collidersToDeactivateOnPointing.Length > 0)
+                {
+                    foreach (Collider collider in collidersToDeactivateOnPointing)
+                    {
+                        collider.enabled = false;
                     }
                 }
             }
@@ -69,9 +103,20 @@ public class VRUIOVRHandTrackingGestureController : VRUIGestureController
                 {
                     thumbCollider.enabled = true;
                 }
+                if (deactivateGrabColliderOnPointing)
+                {
+                    grabCollider.enabled = true;
+                }
                 if (collidersToDeactivateOnPinch.Length > 0)
                 {
                     foreach (Collider collider in collidersToDeactivateOnPinch)
+                    {
+                        collider.enabled = true;
+                    }
+                }
+                if (collidersToDeactivateOnPointing.Length > 0)
+                {
+                    foreach (Collider collider in collidersToDeactivateOnPointing)
                     {
                         collider.enabled = true;
                     }
@@ -87,14 +132,80 @@ public class VRUIOVRHandTrackingGestureController : VRUIGestureController
                 if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) >= minPinchStrength)
                 {
                     VRUIGesture = VRUIGesture.Pinch;
+                    if (deactivateThumbColliderOnPointing)
+                    {
+                        thumbCollider.enabled = true;
+                    }
+                    if (deactivateGrabColliderOnPointing)
+                    {
+                        grabCollider.enabled = true;
+                    }
+                    if (collidersToDeactivateOnPinch.Length > 0)
+                    {
+                        foreach (Collider collider in collidersToDeactivateOnPinch)
+                        {
+                            collider.enabled = false;
+                        }
+                    }
+                    if (collidersToDeactivateOnPointing.Length > 0)
+                    {
+                        foreach (Collider collider in collidersToDeactivateOnPointing)
+                        {
+                            collider.enabled = true;
+                        }
+                    }
                 }
                 else if (!OVRInput.Get(OVRInput.Touch.PrimaryIndexTrigger))
                 {
                     VRUIGesture = VRUIGesture.IndexPointing;
+                    if (deactivateThumbColliderOnPointing)
+                    {
+                        thumbCollider.enabled = false;
+                    }
+                    if (deactivateGrabColliderOnPointing)
+                    {
+                        grabCollider.enabled = false;
+                    }
+                    if (collidersToDeactivateOnPinch.Length > 0)
+                    {
+                        foreach (Collider collider in collidersToDeactivateOnPinch)
+                        {
+                            collider.enabled = true;
+                        }
+                    }
+                    if (collidersToDeactivateOnPointing.Length > 0)
+                    {
+                        foreach (Collider collider in collidersToDeactivateOnPointing)
+                        {
+                            collider.enabled = false;
+                        }
+                    }
                 }
                 else
                 {
                     VRUIGesture = VRUIGesture.None;
+                    if (deactivateThumbColliderOnPointing)
+                    {
+                        thumbCollider.enabled = true;
+                    }
+                    if (deactivateGrabColliderOnPointing)
+                    {
+                        grabCollider.enabled = true;
+                    }
+                    if (collidersToDeactivateOnPinch.Length > 0)
+                    {
+                        foreach (Collider collider in collidersToDeactivateOnPinch)
+                        {
+                            collider.enabled = true;
+                        }
+                    }
+                    if (collidersToDeactivateOnPointing.Length > 0)
+                    {
+                        foreach (Collider collider in collidersToDeactivateOnPointing)
+                        {
+                            collider.enabled = true;
+                        }
+                    }
                 }
             }
             //Right hand
@@ -103,14 +214,80 @@ public class VRUIOVRHandTrackingGestureController : VRUIGestureController
                 if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) >= minPinchStrength)
                 {
                     VRUIGesture = VRUIGesture.Pinch;
+                    if (deactivateThumbColliderOnPointing)
+                    {
+                        thumbCollider.enabled = true;
+                    }
+                    if (deactivateGrabColliderOnPointing)
+                    {
+                        grabCollider.enabled = true;
+                    }
+                    if (collidersToDeactivateOnPinch.Length > 0)
+                    {
+                        foreach (Collider collider in collidersToDeactivateOnPinch)
+                        {
+                            collider.enabled = false;
+                        }
+                    }
+                    if (collidersToDeactivateOnPointing.Length > 0)
+                    {
+                        foreach (Collider collider in collidersToDeactivateOnPointing)
+                        {
+                            collider.enabled = true;
+                        }
+                    }
                 }
                 else if (!OVRInput.Get(OVRInput.Touch.SecondaryIndexTrigger))
                 {
                     VRUIGesture = VRUIGesture.IndexPointing;
+                    if (deactivateThumbColliderOnPointing)
+                    {
+                        thumbCollider.enabled = false;
+                    }
+                    if (deactivateGrabColliderOnPointing)
+                    {
+                        grabCollider.enabled = false;
+                    }
+                    if (collidersToDeactivateOnPinch.Length > 0)
+                    {
+                        foreach (Collider collider in collidersToDeactivateOnPinch)
+                        {
+                            collider.enabled = true;
+                        }
+                    }
+                    if (collidersToDeactivateOnPointing.Length > 0)
+                    {
+                        foreach (Collider collider in collidersToDeactivateOnPointing)
+                        {
+                            collider.enabled = false;
+                        }
+                    }
                 }
                 else
                 {
                     VRUIGesture = VRUIGesture.None;
+                    if (deactivateThumbColliderOnPointing)
+                    {
+                        thumbCollider.enabled = true;
+                    }
+                    if (deactivateGrabColliderOnPointing)
+                    {
+                        grabCollider.enabled = true;
+                    }
+                    if (collidersToDeactivateOnPinch.Length > 0)
+                    {
+                        foreach (Collider collider in collidersToDeactivateOnPinch)
+                        {
+                            collider.enabled = true;
+                        }
+                    }
+                    if (collidersToDeactivateOnPointing.Length > 0)
+                    {
+                        foreach (Collider collider in collidersToDeactivateOnPointing)
+                        {
+                            collider.enabled = true;
+                        }
+                    }
                 }
             }
         }

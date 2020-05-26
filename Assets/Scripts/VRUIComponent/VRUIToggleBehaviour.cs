@@ -1,8 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/********************************************************************************//*
+Created as part of a Bsc in Computer Science for the BFH Biel
+Created by:   Steven Henz
+Date:         26.05.20
+Email:        steven.henz93@gmail.com
+************************************************************************************/
 using UnityEngine;
 using UnityEngine.Events;
-//TODO: Improve VRUIToggle. Maybe dont use VRUIButton as template.
+
+/// <summary>
+/// Simulates a 3D button that needs to be physically touched to use it. It gets stuck after pressing it making it behave like a toggle.
+/// </summary>
 [RequireComponent(typeof(Rigidbody))]
 [ExecuteInEditMode]
 public class VRUIToggleBehaviour : MonoBehaviour
@@ -37,21 +44,44 @@ public class VRUIToggleBehaviour : MonoBehaviour
     [SerializeField]
     [Tooltip("Choose here which gestures can activate this toggle.")]
     private VRUIGesture[] allowedGestures;
+    [SerializeField]
+    [Tooltip("The material of this toggle when it is not stuck. If left empty uses the material of the MeshRenderer of the PhysicalToggles ")]
     private Material baseMaterial;
     [Header("Material")]
     [SerializeField]
     [Tooltip("The material of the toggle after it was pressed.")]
     private Material activeMaterial;
-    [Header("UnityEvents")]
     //Events that fire when the toggle gets activated/changes material.
+    [System.Serializable]
+    public class VRUIOnToggleDownEvent : UnityEvent<string> { }
+    [Header("UnityEvents")]
     [SerializeField]
-    private UnityEvent onVRUIToggleDown = null;
+    public VRUIOnToggleDownEvent m_onVRUIToggleDown;
+    public VRUIOnToggleDownEvent onVRUIToggleDown
+    {
+        get { return m_onVRUIToggleDown; }
+        set { m_onVRUIToggleDown = value; }
+    }
     //Events that fire every frame the toggle is active.
+    [System.Serializable]
+    public class VRUIOnToggleStuckEvent : UnityEvent<string> { }
     [SerializeField]
-    private UnityEvent onVRUIToggleStuck = null;
+    private VRUIOnToggleStuckEvent m_onVRUIToggleStuck;
+    public VRUIOnToggleStuckEvent onVRUIToggleStuck
+    {
+        get { return m_onVRUIToggleStuck; }
+        set { m_onVRUIToggleStuck = value; }
+    }
     //Events that fire when the toggle deactivates.
+    [System.Serializable]
+    public class VRUIOnToggleUpEvent : UnityEvent<string> { }
     [SerializeField]
-    private UnityEvent onVRUIToggleUp = null;
+    private VRUIOnToggleUpEvent m_onVRUIToggleUp;
+    public VRUIOnToggleUpEvent onVRUIToggleUp
+    {
+        get { return m_onVRUIToggleUp; }
+        set { m_onVRUIToggleUp = value; }
+    }
     private VRUIVibration vibrationBehaviour;
     [Header("State")]
     [SerializeField]
@@ -97,7 +127,6 @@ public class VRUIToggleBehaviour : MonoBehaviour
                 allowedGestures[0] = VRUIGesture.IndexPointing;
             }
             //Get componentss
-            BaseMaterial = PhysicalToggle.GetComponent<Renderer>().material;
             VibrationBehaviour = GetComponent<VRUIVibration>();
             meshRenderer = physicalToggle.GetComponent<MeshRenderer>();
             //The rigidbody should be kinematic and unaffected by gravity.
@@ -108,12 +137,15 @@ public class VRUIToggleBehaviour : MonoBehaviour
             startPosition = currentPosition = physicalToggle.transform.localPosition;
             deltaPosition = Vector3.zero;
             getVRUIToggleDown = false;
-            getVRUIToggleUp = true;
+            getVRUIToggleUp = false;
         }
     }
 
     private void OnEnable()
     {
+        if(Application.isPlaying)
+            if(!BaseMaterial)
+                BaseMaterial = PhysicalToggle.GetComponent<Renderer>().material;
         lastScale = transform.localScale;
     }
 
@@ -150,20 +182,21 @@ public class VRUIToggleBehaviour : MonoBehaviour
         //toggleDown should only be true at that moment where the toggle activates
         GetVRUIToggleDown = getVRUIToggle;
         //toggleUp should only be true at that moment where the toggle deactivates
-        GetVRUIToggleUp = !getVRUIToggle;
+        GetVRUIToggleUp = !ToggleIsStuck;
     }
 
-    //TODO: Check if toggleup/down can be invoked here instead of the seperate methods
     private void FireToggleEvents()
     {
         if (ToggleIsStuck)
         {
-            meshRenderer.material = activeMaterial;
-            onVRUIToggleStuck.Invoke();
+            if(meshRenderer.material != activeMaterial)
+                meshRenderer.material = activeMaterial;
+            m_onVRUIToggleStuck.Invoke(name);
         }
         else
         {
-            meshRenderer.material = BaseMaterial;
+            if(meshRenderer.material != BaseMaterial)
+                meshRenderer.material = BaseMaterial;
         }
     }
 
@@ -206,7 +239,7 @@ public class VRUIToggleBehaviour : MonoBehaviour
         //If the toggle is not touched and is not stuck slowly return it to its startPosition
         else if (currentPosition != startPosition && !toggleIsStuck)
         {
-            waitTime += Time.deltaTime;
+            waitTime += Time.fixedDeltaTime;
             //Only move the toggle to its start position after the chosen delay
             if (waitTime >= returnDelay)
             {
@@ -215,7 +248,7 @@ public class VRUIToggleBehaviour : MonoBehaviour
         }
         else if(currentPosition != startPosition && toggleIsStuck)
         {
-            waitTime += Time.deltaTime;
+            waitTime += Time.fixedDeltaTime;
             //Only move the toggle to its start position after the chosen delay
             if (waitTime >= returnDelay)
             {
@@ -295,7 +328,7 @@ public class VRUIToggleBehaviour : MonoBehaviour
             getVRUIToggleDown = value;
             if (getVRUIToggleDown)
             {
-                onVRUIToggleDown.Invoke();
+                m_onVRUIToggleDown.Invoke(name);
                 toggleIsStuck = !toggleIsStuck;
             }
         }
@@ -312,7 +345,7 @@ public class VRUIToggleBehaviour : MonoBehaviour
             getVRUIToggleUp = value;
             if (getVRUIToggleUp)
             {
-                onVRUIToggleUp.Invoke();
+                m_onVRUIToggleUp.Invoke(name);
             }
         }
     }

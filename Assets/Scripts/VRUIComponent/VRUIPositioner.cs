@@ -1,8 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/********************************************************************************//*
+Created as part of a Bsc in Computer Science for the BFH Biel
+Created by:   Steven Henz
+Date:         26.05.20
+Email:        steven.henz93@gmail.com
+************************************************************************************/
 using UnityEngine;
 using UnityEditor;
 
+/// <summary>
+/// Helps to position the VRUIElements with the help of an anchoring system.
+/// </summary>
 [System.Serializable]
 [ExecuteInEditMode]
 public class VRUIPositioner : MonoBehaviour
@@ -46,7 +53,7 @@ public class VRUIPositioner : MonoBehaviour
     [HideInInspector]
     private Quaternion lastParentRotationValue;
 
-    //Null check references
+    //For Null check references
     private VRUIPanelBehaviour parentPanel;
     private MeshFilter parentMeshFilter;
     private VRUIScrollPanelBehaviour scrollPanelBehaviour;
@@ -55,7 +62,7 @@ public class VRUIPositioner : MonoBehaviour
 
     private void OnEnable()
     {
-        if (!Application.isPlaying)
+        if (!Application.isPlaying && HasParentVRUIPositioner())
         {
             parent = transform.parent ? transform.parent : null;
             lastParent = parent;
@@ -73,7 +80,6 @@ public class VRUIPositioner : MonoBehaviour
             if (HasParentVRUIPositioner())
                 SetupAnchor();
             SetPositionRelativeToAnchor();
-            //SetRotationRelativeToParent();
             lastPosition = transform.position;
         }
 #if UNITY_EDITOR
@@ -88,19 +94,6 @@ public class VRUIPositioner : MonoBehaviour
         {
             SetPositionRelativeToAnchor();
         }
-        /*
-        if (transform.parent)
-        {
-            if (transform.rotation != transform.parent.rotation * Quaternion.Euler(RelativeEulerRotation))
-            {
-                SetRotationRelativeToParent();
-            }
-        }
-        else if(transform.rotation != Quaternion.Euler(RelativeEulerRotation))
-        {
-            SetRotationRelativeToParent();
-        }
-        */
     }
 
     private void OnDestroy()
@@ -152,7 +145,6 @@ public class VRUIPositioner : MonoBehaviour
             //If the parent has a VRUIScrollPanelBehaviour, this script shouldnt control the objects position
             if (!scrollPanelBehaviour)
             {
-                //Debug.Log("vruiPositionerChangedTransform=" + vruiPositionerChangedTransform + ";transform.hasChanged=" + transform.hasChanged + ";name=" + name);
                 if (VRUIPositionerChangedTransform)
                 {
                     HaveToUpdateRelativeValues = false;
@@ -167,7 +159,6 @@ public class VRUIPositioner : MonoBehaviour
                 {
                     SetupAnchor();
                     SetPositionRelativeToAnchor();
-                    //SetRotationRelativeToParent();
                 }
                 //If rotation changed recalculate the anchorposition
                 if (parent && lastParentRotationValue != transform.parent.rotation)
@@ -197,19 +188,16 @@ public class VRUIPositioner : MonoBehaviour
         if (transform.parent.GetComponent<VRUIPanelBehaviour>())
         {
             parentSize = transform.parent.GetComponent<VRUIPanelBehaviour>().PanelBounds.extents;
-            //Debug.Log("Panel: " + boundsOfParent);
         }
         else if (transform.parent.GetComponent<MeshFilter>())
         {
             //Mesh.bounds is called because it has its bounding box aligned to local space
             parentSize = transform.parent.gameObject.GetComponent<MeshFilter>().sharedMesh.bounds.extents;
-            //Debug.Log("Meshfilter: " + boundsOfParent);
         }
         else
         {
             //If we find no reference for the bounding box we just create a default box with size one.
             parentSize = new Bounds(transform.parent.position, Vector3.one).extents;
-            //Debug.Log("No bounds found");
         }
         //Check which anchorpoint was chosen and calculate the position of said anchor.
         switch (anchor)
@@ -257,10 +245,8 @@ public class VRUIPositioner : MonoBehaviour
 
     public void SetPositionRelativeToAnchor()
     {
-        //transform.position = (transform.right * RelativePosition.x) + (transform.up * RelativePosition.y) + (transform.forward * RelativePosition.z) + AnchorPosition;
         transform.position = AnchorPosition + RelativePosition;
         VRUIPositionerChangedTransform = true;
-        //transform.hasChanged = false;
     }
 
     public void SetRotationRelativeToParent()
@@ -270,12 +256,11 @@ public class VRUIPositioner : MonoBehaviour
         else
             transform.rotation = Quaternion.Euler(RelativeEulerRotation);
         VRUIPositionerChangedTransform = true;
-        //transform.hasChanged = false;
     }
 
     public bool HasParentVRUIPositioner()
     {
-        //If there is no parent at all we do not need to check for a VRUITransformOld2 in the parent.
+        //If there is no parent at all we do not need to check for a VRUIPositioner in the parent.
         if (transform.parent)
         {
             VRUIPositioner parent = transform.parent.gameObject.GetComponent<VRUIPositioner>();
@@ -284,6 +269,11 @@ public class VRUIPositioner : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Is used to make sure the transform was changed by the VRUIPositioner script. If this is not the case,
+    /// we update the relative position in the custom editor script. Also makes sure that all the parent 
+    /// VRUIPositioner components get updated if necessary.
+    /// </summary>
     public bool VRUIPositionerChangedTransform
     {
         get { return vruiPositionerChangedTransform; }
@@ -294,7 +284,6 @@ public class VRUIPositioner : MonoBehaviour
             {
                 transform.parent.GetComponent<VRUIPositioner>().VRUIPositionerChangedTransform = value;
             }
-            //Debug.Log("vruiPositionerChangedTransform=" + vruiPositionerChangedTransform + ";name=" + name);
         }
     }
 

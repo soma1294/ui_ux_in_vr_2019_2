@@ -1,8 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/********************************************************************************//*
+Created as part of a Bsc in Computer Science for the BFH Biel
+Created by:   Steven Henz
+Date:         26.05.20
+Email:        steven.henz93@gmail.com
+************************************************************************************/
 using UnityEngine;
 using UnityEditor;
 
+/// <summary>
+/// The Custom Editor Script for the VRUISliderBehaviour Script. Among other things creates the gizmo that can be used to change the slider length
+/// in the scene view.
+/// </summary>
 [CustomEditor(typeof(VRUISliderBehaviour)), CanEditMultipleObjects]
 public class VRUISliderBehaviourEditor : Editor
 {
@@ -151,6 +159,9 @@ public class VRUISliderBehaviourEditor : Editor
         }
     }
 
+    /// <summary>
+    /// Creates the gizmo that can be used to change the path length.
+    /// </summary>
     private void DrawLengthChooser()
     {
         float pathLength = m_target.LengthOfPath;
@@ -163,7 +174,7 @@ public class VRUISliderBehaviourEditor : Editor
         pathLength = Handles.ScaleSlider(pathLength, m_target.gameObject.transform.position, m_target.gameObject.transform.up, m_target.gameObject.transform.rotation, size, 0.1f);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObjects(new Object[] { m_target.GetComponent<VRUISliderBehaviour>(), m_target.transform }, "Undo VRUI Slider Length");
+            Undo.RecordObjects(new Object[] { m_target.GetComponent<VRUISliderBehaviour>(), m_target.transform }, "VRUI Slider Length");
 
             m_target.LengthOfPath = pathLength;
             m_target.CreatePath();

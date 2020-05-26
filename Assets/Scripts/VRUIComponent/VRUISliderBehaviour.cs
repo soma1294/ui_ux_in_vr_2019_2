@@ -1,8 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/********************************************************************************//*
+Created as part of a Bsc in Computer Science for the BFH Biel
+Created by:   Steven Henz
+Date:         26.05.20
+Email:        steven.henz93@gmail.com
+************************************************************************************/
 using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// Simulates a 3D slider that needs to be physically touched to use it.
+/// </summary>
 [RequireComponent(typeof(Rigidbody))]
 [ExecuteInEditMode]
 public class VRUISliderBehaviour : MonoBehaviour
@@ -32,10 +39,6 @@ public class VRUISliderBehaviour : MonoBehaviour
     [Tooltip("The z-position of the knob, relative to the path.")]
     float zPositionKnob = -0.025f;
     [Header("Interaction Settings")]
-    //TODO: is stifness still necessary?
-    //[SerializeField]
-    //[Tooltip("How fast the knob adjusts its position. 0 means it never reaches the new position, 1 it reaches it almost instantly.")]
-    //private float stifness = 0.5f;
     [SerializeField]
     [Tooltip("If the object/hand that touches the knob is farther away than this, the knob wont be moved.")]
     private float maxAllowedDistanceToMove = 0.2f;
@@ -81,7 +84,6 @@ public class VRUISliderBehaviour : MonoBehaviour
     //Variables that store values of the touching finger
     private Transform touchingObjectTransform;
     private bool knobIsTouched;
-    private Vector3 startTouchPosition;
     private Vector3 startTouchKnobPosition;
     private Vector3 currentTouchPosition;
     private Vector3 deltaTouchPosition;
@@ -153,13 +155,11 @@ public class VRUISliderBehaviour : MonoBehaviour
                 if (!CorrectGestureUsed())
                 {
                     InteractionFinished();
-                    //Debug.Log("Wrong Gesture");
                 }
                 if (GestureChanged())
                 {
                     InteractionFinished();
                     locked = true;
-                    //Debug.Log("Gesture Changed");
                 }
             }
             if (touchingObjectTransform)
@@ -169,7 +169,6 @@ public class VRUISliderBehaviour : MonoBehaviour
                 {
                     InteractionFinished();
                     locked = true;
-                    //Debug.Log("Max Distance Reached");
                 }
             }
             //When the value changed, invoke the OnValueChanged event
@@ -196,32 +195,6 @@ public class VRUISliderBehaviour : MonoBehaviour
         touchingObjectTransform = null;
         lastGesture = VRUIGesture.None;
     }
-    /*
-    private void FixedUpdate()
-    {
-        if (knobIsTouched)
-        {
-            currentTouchPosition = touchingObjectTransform.position;
-            //deltaTouchPosition = currentTouchPosition - startTouchPosition;
-            deltaTouchPosition = currentTouchPosition - startTouchKnobPosition;
-            Vector3 localDeltaTouchPosition = transform.worldToLocalMatrix * deltaTouchPosition;
-            Vector3 targetPosition;
-
-            targetPosition.x = 0f;
-            targetPosition.y = PhysicalKnob.transform.localPosition.y + localDeltaTouchPosition.y;
-            targetPosition.z = zPositionKnob;
-            //Debug.Log("deltaTouch=" + deltaTouchPosition + ";targetPosition=" + targetPosition);
-            if (targetPosition.y >= endOfPath.y)
-            {
-                targetPosition = new Vector3(0f, endOfPath.y, zPositionKnob);
-            }
-            else if (targetPosition.y <= startOfPath.y)
-            {
-                targetPosition = new Vector3(0f, startOfPath.y, zPositionKnob);
-            }
-            PhysicalKnob.transform.localPosition = Vector3.Lerp(PhysicalKnob.transform.localPosition, targetPosition, stifness);
-        }
-    }*/
 
     private void FixedUpdate()
     {
@@ -232,7 +205,6 @@ public class VRUISliderBehaviour : MonoBehaviour
             {
                 touchingObjectTransform = null;
 
-                startTouchPosition = Vector3.zero;
                 startTouchKnobPosition = Vector3.zero;
                 currentTouchPosition = Vector3.zero;
 
@@ -302,7 +274,6 @@ public class VRUISliderBehaviour : MonoBehaviour
         PhysicalKnob.transform.localPosition = new Vector3(targetPos.x, targetPos.y, targetPos.z + zPositionKnob);
     }
 
-    //TODO: FIX see Update Knob Position
     private void UpdateCurrentValue()
     {
         Vector3 knobWithoutZ = new Vector3(PhysicalKnob.transform.localPosition.x, PhysicalKnob.transform.localPosition.y);
@@ -334,7 +305,6 @@ public class VRUISliderBehaviour : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        //Debug.Log("TriggerEnterSlider: " + other.gameObject.name);
         if (other.transform == touchingObjectTransform)
             return;
         gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
@@ -349,7 +319,6 @@ public class VRUISliderBehaviour : MonoBehaviour
         }
         touchingObjectTransform = other.transform;
 
-        startTouchPosition = touchingObjectTransform.position;
         startTouchKnobPosition = PhysicalKnob.transform.position;
         currentTouchPosition = touchingObjectTransform.position;
 
@@ -360,7 +329,6 @@ public class VRUISliderBehaviour : MonoBehaviour
     
     private void OnTriggerStay(Collider other)
     {
-        //Debug.Log("TriggerEnterSlider: " + other.gameObject.name);
         if (other.transform == touchingObjectTransform)
             return;
         gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
@@ -375,7 +343,6 @@ public class VRUISliderBehaviour : MonoBehaviour
         }
         touchingObjectTransform = other.transform;
 
-        startTouchPosition = touchingObjectTransform.position;
         startTouchKnobPosition = PhysicalKnob.transform.position;
         currentTouchPosition = touchingObjectTransform.position;
 
@@ -404,7 +371,6 @@ public class VRUISliderBehaviour : MonoBehaviour
 
     private bool GestureChanged()
     {
-        //Debug.Log("gesture=" + gestureControllerToMonitor.VRUIGesture + ";lastgesture=" + lastGesture);
         if (!gestureControllerToMonitor)
         {
             return true;
@@ -421,7 +387,6 @@ public class VRUISliderBehaviour : MonoBehaviour
         }
     }
 
-    //TODO: Aufpassen ob Formel robust genung für kleinen Max und grossen Min Wert ist.
     public float MinValue
     {
         get { return minValue; }
@@ -515,5 +480,10 @@ public class VRUISliderBehaviour : MonoBehaviour
     {
         get { return physicalKnob; }
         set { physicalKnob = value; }
+    }
+
+    public VRUIGestureController LastRegisteredGestureController
+    {
+        get { return gestureController; }
     }
 }

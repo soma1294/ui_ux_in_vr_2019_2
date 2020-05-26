@@ -1,6 +1,15 @@
-﻿using UnityEngine;
+﻿/********************************************************************************//*
+Created as part of a Bsc in Computer Science for the BFH Biel
+Created by:   Steven Henz
+Date:         26.05.20
+Email:        steven.henz93@gmail.com
+************************************************************************************/
+using UnityEngine;
 using UnityEditor;
 
+/// <summary>
+/// This script adds options to the context menu of the hierarchy view for creating VRUIElements.
+/// </summary>
 public class VRUICustomMenu : MonoBehaviour
 {
     [MenuItem("GameObject/VRUI Component/VRUIPanel", false, 10)]

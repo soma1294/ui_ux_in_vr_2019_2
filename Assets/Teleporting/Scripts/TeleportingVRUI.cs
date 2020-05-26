@@ -2,6 +2,11 @@
 
 public class TeleportingVRUI : MonoBehaviour
 {
+    public bool useHandTracking;
+    public OVRHand[] hands;
+    public Transform playerHead;
+
+    private bool cancelTeleport = false;
     [SerializeField, Range(1, 7)]
     private byte resolutionLevel;   // What level of resolution should the arc be  
     [SerializeField]
@@ -89,7 +94,11 @@ public class TeleportingVRUI : MonoBehaviour
             chosenAreaIsValid = true;
         }
         OVRInput.Controller controller = OVRInput.Controller.None;
-        bool isPressed = virtualButtonIsPressed || IsButtonPressed(buttonToCheck, out controller);
+        bool isPressed;
+        if (!useHandTracking)
+            isPressed = (virtualButtonIsPressed || IsButtonPressed(buttonToCheck, out controller)) && !cancelTeleport;
+        else
+            isPressed = WantsToTeleportHandtracking();
         EnableAll(isPressed);
         // If the trigger is pressed...
         if (isPressed)
@@ -97,13 +106,23 @@ public class TeleportingVRUI : MonoBehaviour
             Vector3 controllerRotationEuler, controllerPos;
             float angleX, angleY, heightFromDeepestPoint;
             //Use physical controller
-            if (!virtualButtonIsPressed)
+            if (!virtualButtonIsPressed && !useHandTracking)
             {
                 // Get position and rotation from controller relative to the CameraRig
                 controllerRotationEuler = (vrPlayer.rotation * OVRInput.GetLocalControllerRotation(controller)).eulerAngles;
                 angleX = -controllerRotationEuler.x * Mathf.Deg2Rad;
                 angleY = (-controllerRotationEuler.y + 90.0f) * Mathf.Deg2Rad;
                 controllerPos = Quaternion.AngleAxis(vrPlayer.rotation.eulerAngles.y, Vector3.up) * OVRInput.GetLocalControllerPosition(controller) + vrPlayer.position;
+                heightFromDeepestPoint = controllerPos.y - deepestPoint;
+            }
+            //Use handTracking
+            else if (useHandTracking)
+            {
+                // Get position and rotation from controller relative to the CameraRig
+                controllerRotationEuler = (hands[0].PointerPose).eulerAngles;
+                angleX = -controllerRotationEuler.x * Mathf.Deg2Rad;
+                angleY = (-controllerRotationEuler.y + 90.0f) * Mathf.Deg2Rad;
+                controllerPos = Quaternion.AngleAxis(vrPlayer.rotation.eulerAngles.y, Vector3.up) * (playerHead.position - new Vector3(0, 0.25f, 0));
                 heightFromDeepestPoint = controllerPos.y - deepestPoint;
             }
             //Use virtual button
@@ -127,7 +146,7 @@ public class TeleportingVRUI : MonoBehaviour
             teleportPos = hitPos;
         }
         // or if the trigger were released and something was hit AND the checker is NOT assigned
-        else if (teleportPos != Vector3.zero && checkers.Length == 0)
+        else if (teleportPos != Vector3.zero && checkers.Length == 0 && !cancelTeleport)
         {
             // Adjusting position because we move the origin. So we have to calculate the offset from the head
             Vector3 diff = vrPlayer.position - vrPlayer.GetChild(0).GetChild(1).position;
@@ -137,7 +156,7 @@ public class TeleportingVRUI : MonoBehaviour
             teleportPos = Vector3.zero;
         }
         // or if the trigger were released and something was hit AND the checker IS assigned
-        else if (teleportPos != Vector3.zero && chosenAreaIsValid) 
+        else if (teleportPos != Vector3.zero && chosenAreaIsValid && !cancelTeleport) 
         {
             // Adjusting position because we move the origin. So we have to calculate the offset from the head
             Vector3 diff = vrPlayer.position - vrPlayer.GetChild(0).GetChild(1).position;
@@ -147,6 +166,45 @@ public class TeleportingVRUI : MonoBehaviour
             teleportPos = Vector3.zero;
         }
         boundaryParent.transform.position = circle.position;
+        if (cancelTeleport)
+        {
+            teleportPos = Vector3.zero;
+            chosenAreaIsValid = false;
+            EnableAll(false);
+            cancelTeleport = false;
+        }
+    }
+
+    /// <summary>
+    /// Helps with teleporting logic when we use handtracking. If we grab something we make a fist with the hand that grabs the object. Teleporting should not activate when we dont want to.
+    /// We try to prevent this by checking the other hand. If the other hand is using only the index finger to pinch, we assume the player wants to teleport. If any other finger is pinched, we assume the
+    /// player does not want to teleport.
+    /// </summary>
+    /// <returns></returns>
+    private bool WantsToTeleportHandtracking()
+    {
+        bool indexPinchedLeft = hands[0].GetFingerIsPinching(OVRHand.HandFinger.Index);
+        bool indexPinchedRight = hands[1].GetFingerIsPinching(OVRHand.HandFinger.Index);
+        bool otherPinchedLeft = hands[0].GetFingerIsPinching(OVRHand.HandFinger.Middle) || hands[0].GetFingerIsPinching(OVRHand.HandFinger.Pinky) || hands[0].GetFingerIsPinching(OVRHand.HandFinger.Ring) || hands[0].GetFingerIsPinching(OVRHand.HandFinger.Pinky);
+        bool otherPinchedRight = hands[1].GetFingerIsPinching(OVRHand.HandFinger.Middle) || hands[1].GetFingerIsPinching(OVRHand.HandFinger.Pinky) || hands[1].GetFingerIsPinching(OVRHand.HandFinger.Ring) || hands[1].GetFingerIsPinching(OVRHand.HandFinger.Pinky);
+
+        //If we make a fist on our left hand
+        if (indexPinchedLeft && otherPinchedLeft)
+        {
+            if (indexPinchedRight && otherPinchedRight)
+            {
+                return false;
+            }
+        }
+        //If we make a fist on our right hand
+        if (indexPinchedRight && otherPinchedRight)
+        {
+            if (indexPinchedLeft && otherPinchedLeft)
+            {
+                return false;
+            }
+        }
+        return indexPinchedLeft && indexPinchedRight && hands[0].HandConfidence == OVRHand.TrackingConfidence.High && hands[1].HandConfidence == OVRHand.TrackingConfidence.High;
     }
 
     public void VirtualButtonIsPressed()
@@ -157,6 +215,12 @@ public class TeleportingVRUI : MonoBehaviour
     public void VirtualButtonIsUp()
     {
         virtualButtonIsPressed = false;
+    }
+
+    public void CancelTeleport()
+    {
+        virtualButtonIsPressed = false;
+        cancelTeleport = true;
     }
 
     // Returns true when a button was pressed and stores the controller on which the trigger was pressed

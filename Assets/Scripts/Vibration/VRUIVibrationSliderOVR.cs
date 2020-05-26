@@ -8,10 +8,10 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Shows how VRUIVibration can be implemented. Specifically made for the VRUIButtonBehaviour component used
+/// Shows how VRUIVibration can be implemented. Specifically made for the VRUISliderBehaviour component used
 /// with the Oculus Quest.
 /// </summary>
-public class VRUIVibrationButtonOVR : VRUIVibration
+public class VRUIVibrationSliderOVR : VRUIVibration
 {
     [SerializeField]
     [Tooltip("If this is true the controller will vibrate.")]
@@ -21,7 +21,7 @@ public class VRUIVibrationButtonOVR : VRUIVibration
     {
         if (vibrate)
         {
-            VRUIGestureController gestureController = GetComponent<VRUIButtonBehaviour>().LastRegisteredGestureController;
+            VRUIGestureController gestureController = GetComponent<VRUISliderBehaviour>().LastRegisteredGestureController;
             if (!gestureController)
                 return;
             if (gestureController.Hand == VRUIGestureController.HandSide.left)
@@ -32,7 +32,7 @@ public class VRUIVibrationButtonOVR : VRUIVibration
             {
                 StartCoroutine(OVRVibration(VibrationFrequency, VibrationAmplitude, VibrationDuration, OVRInput.Controller.RTouch));
             }
-        } 
+        }
     }
 
     private IEnumerator OVRVibration(float freq, float amp, float duration, OVRInput.Controller controller)

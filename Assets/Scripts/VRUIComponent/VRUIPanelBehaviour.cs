@@ -1,8 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/********************************************************************************//*
+Created as part of a Bsc in Computer Science for the BFH Biel
+Created by:   Steven Henz
+Date:         26.05.20
+Email:        steven.henz93@gmail.com
+************************************************************************************/
 using UnityEngine;
 using UnityEditor;
 
+/// <summary>
+/// Helps positioning the VRUIElements by providing a two-sided plane, that can be used like a UI panel.
+/// </summary>
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 [ExecuteInEditMode]
 public class VRUIPanelBehaviour : MonoBehaviour
@@ -16,7 +23,6 @@ public class VRUIPanelBehaviour : MonoBehaviour
     [HideInInspector]
     private float panelSizeY;
 
-    private Mesh mesh;
     private Mesh meshFront;
     private Mesh meshBack;
 
@@ -28,12 +34,16 @@ public class VRUIPanelBehaviour : MonoBehaviour
 
     private void OnEnable()
     {
-        FirstDrawPanel();
         lastScale = transform.localScale;
 #if UNITY_EDITOR
         Undo.undoRedoPerformed -= UndoPanel;
         Undo.undoRedoPerformed += UndoPanel;
 #endif
+    }
+
+    private void Start()
+    {
+        FirstDrawPanel();
     }
 
     private void UndoPanel()
@@ -58,9 +68,6 @@ public class VRUIPanelBehaviour : MonoBehaviour
             PanelSizeY = 1;
             RedrawPanel();
         }
-        //On undo, we want to Redraw the panel to make sure it has the correct size.
-        //Undo.undoRedoPerformed -= RedrawPanel;
-        //Undo.undoRedoPerformed += RedrawPanel;
     }
 
     private void OnDestroy()
@@ -71,10 +78,12 @@ public class VRUIPanelBehaviour : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Only draw the mesh the first time, when no mesh exists. Ignores any VRUIPositioner components.
+    /// </summary>
     protected void FirstDrawPanel()
     {
         lastPanelSize = new Vector2(PanelSizeX, PanelSizeY);
-        //TODO: Check if it still leaks when this if is not executing
         if (Application.isPlaying)
         {
             Destroy(meshFront);
@@ -154,10 +163,12 @@ public class VRUIPanelBehaviour : MonoBehaviour
         transform.position = pos;
     }
 
+    /// <summary>
+    /// Draws the panel. Updates all associated VRUIPositioner components.
+    /// </summary>
     public void RedrawPanel()
     {
         lastPanelSize = new Vector2(PanelSizeX, PanelSizeY);
-        //TODO: Check if it still leaks when this if is not executing
         if (Application.isPlaying)
         {
             Destroy(meshFront);
@@ -208,7 +219,6 @@ public class VRUIPanelBehaviour : MonoBehaviour
 
         //Save all relevant data before we set the position to the worlds origin point
         //This is important for the combination of the meshes
-        //Vector3 scale = transform.localScale;
         Transform parent = transform.parent;
         Vector3 scale = transform.lossyScale;
         Quaternion rot = transform.rotation;
@@ -216,7 +226,6 @@ public class VRUIPanelBehaviour : MonoBehaviour
         Matrix4x4 myTransform = transform.worldToLocalMatrix;
 
         //Set the transform to the origin of the world
-        //transform.localScale = Vector3.one;
         transform.SetParent(null);
         transform.localScale = Vector3.one;
         transform.rotation = Quaternion.identity;
@@ -241,14 +250,13 @@ public class VRUIPanelBehaviour : MonoBehaviour
         transform.position = pos;
         transform.SetParent(parent);
 
-        //The anchors now need to be repositioned TODO: Beste Methode?
+        //The anchors now need to be repositioned
         foreach (Transform child in transform)
         {
             VRUIPositioner positioner = child.gameObject.GetComponent<VRUIPositioner>();
             if (positioner)
             {
                 positioner.SetupAnchor();
-                //positioner.SetRotationRelativeToParent();
                 positioner.SetPositionRelativeToAnchor();
             }
         }
