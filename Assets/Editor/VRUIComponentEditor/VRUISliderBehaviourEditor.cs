@@ -87,10 +87,15 @@ public class VRUISliderBehaviourEditor : Editor
                     knob.transform.localPosition = Vector3.zero;
                     knob.GetComponent<BoxCollider>().isTrigger = true;
                 }
-                else if(m_target.transform.GetChild(0).gameObject.GetComponent<Collider>())
+                else
                 {
                     //Child 0 is the physical knob
                     knob = m_target.transform.GetChild(0).gameObject;
+                    //If the knob has no collider add one
+                    if (!knob.GetComponent<Collider>())
+                    {
+                        knob.AddComponent<BoxCollider>().isTrigger = true;
+                    }
                     //Create path gameobject
                     path = new GameObject();
                     path.name = "Slider Path";
@@ -121,12 +126,18 @@ public class VRUISliderBehaviourEditor : Editor
                             lineRenderer.material = m_target.PathMaterial;
                         }
                     }
-                    //If the object has a collider it is used as the knob.
-                    if (!knob && child.gameObject.GetComponent<Collider>())
+                    //If the object has no LineRenderer is is used as the knob
+                    if (!knob && !child.gameObject.GetComponent<LineRenderer>())
                     {
                         //The path and the knob can not be the same object
                         if (path != child.gameObject)
+                        {
                             knob = child.gameObject;
+                            if (!knob.GetComponent<Collider>())
+                            {
+                                knob.AddComponent<BoxCollider>().isTrigger = true;
+                            }
+                        }
                     }
                 }
                 knob.transform.SetAsFirstSibling();

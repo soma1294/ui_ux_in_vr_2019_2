@@ -71,4 +71,10 @@ public class VRUITextcontainerBehaviour : MonoBehaviour
         if(textMesh)
             textMesh.text = text;
     }
+
+    public void ChangeTextToFloat(float value)
+    {
+        if (textMesh)
+            textMesh.text = value.ToString("0.00");
+    }
 }
