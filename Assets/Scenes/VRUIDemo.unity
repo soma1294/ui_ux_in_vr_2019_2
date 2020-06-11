@@ -1421,7 +1421,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 510447387}
   m_LocalRotation: {x: -0.00000005960463, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.9, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.099999994, y: 0.100000024, z: 0.100000024}
   m_Children: []
   m_Father: {fileID: 6269489196546068013}
@@ -7102,7 +7102,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6269489196546068090}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: -0.7071068}
-  m_LocalPosition: {x: -0.15, y: -0.03181982, z: -0.031819817}
+  m_LocalPosition: {x: -0.15, y: 0.000000007450581, z: -0.045000013}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 6616661012681634746}
@@ -7147,7 +7147,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6269489196546068093}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: -0.7071068}
-  m_LocalPosition: {x: 0.15, y: -0.03181982, z: -0.031819817}
+  m_LocalPosition: {x: 0.15, y: 0.000000007450581, z: -0.045000013}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1447316952}
@@ -9086,7 +9086,7 @@ MonoBehaviour:
   vruiPositionerChangedTransform: 0
   parent: {fileID: 0}
   lastParent: {fileID: 0}
-  haveToUpdateRelativeValues: 0
+  haveToUpdateRelativeValues: 1
   lastParentRotationValue: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
 --- !u!114 &6269489196546068134
 MonoBehaviour:
