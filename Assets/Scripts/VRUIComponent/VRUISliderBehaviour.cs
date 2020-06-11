@@ -108,11 +108,13 @@ public class VRUISliderBehaviour : MonoBehaviour
             allowedGestures = new VRUIGesture[1];
             allowedGestures[0] = VRUIGesture.IndexPointing;
         }
-        if (path) {
+        if (path)
+        {
             //Create the path visuals
             CreatePath();
         }
-        if (physicalKnob) {
+        if (physicalKnob)
+        {
             //Place handle at the start position
             SetupSliderKnobPosition();
         }
@@ -240,10 +242,10 @@ public class VRUISliderBehaviour : MonoBehaviour
             MaxValue = 1;
         }
         float distance = Vector3.Distance(startOfPath, endOfPath);
-        Vector3 targetPos = (endOfPath - startOfPath).normalized 
-                          * distance 
+        Vector3 targetPos = (endOfPath - startOfPath).normalized
+                          * distance
                           * ((CurrentValue - minValue) / (MaxValue - minValue))
-                          - (endOfPath - startOfPath).normalized * (distance/2);
+                          - (endOfPath - startOfPath).normalized * (distance / 2);
         PhysicalKnob.transform.localPosition = new Vector3(targetPos.x, targetPos.y, targetPos.z + zPositionKnob);
     }
 
@@ -283,7 +285,8 @@ public class VRUISliderBehaviour : MonoBehaviour
         if (distanceKnobToStart <= 0)
         {
             CurrentValue = MinValue;
-        } else if (distanceKnobToStart >= distance)
+        }
+        else if (distanceKnobToStart >= distance)
         {
             CurrentValue = MaxValue;
         }
@@ -293,21 +296,12 @@ public class VRUISliderBehaviour : MonoBehaviour
         }
     }
 
-    public void AddValueToCurrentValue(float value)
-    {
-        float newValue = currentValue + value;
-        if (newValue >= maxValue)
-            newValue = maxValue;
-        if (newValue <= minValue)
-            newValue = minValue;
-        UpdateKnobPosition();
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.transform == touchingObjectTransform)
             return;
-        gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
+        if (other.attachedRigidbody)
+            gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
         if (useGestureController)
         {
             if (locked)
@@ -326,12 +320,13 @@ public class VRUISliderBehaviour : MonoBehaviour
 
         knobIsTouched = true;
     }
-    
+
     private void OnTriggerStay(Collider other)
     {
         if (other.transform == touchingObjectTransform)
             return;
-        gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
+        if (other.attachedRigidbody)
+            gestureController = other.attachedRigidbody.gameObject.GetComponent<VRUIGestureController>();
         if (useGestureController)
         {
             if (locked)
@@ -355,7 +350,7 @@ public class VRUISliderBehaviour : MonoBehaviour
             }
         }
     }
-    
+
     private bool CorrectGestureUsed()
     {
         correctGesture = false;
@@ -409,14 +404,17 @@ public class VRUISliderBehaviour : MonoBehaviour
                 if (value < MinValue)
                 {
                     startValue = MinValue;
-                } else if (value > MaxValue)
+                }
+                else if (value > MaxValue)
                 {
                     startValue = MaxValue;
-                } else
+                }
+                else
                 {
                     startValue = value;
                 }
-            } else
+            }
+            else
             {
                 if (value > MinValue)
                 {

@@ -213,7 +213,7 @@ public class VRUIButtonBehaviour : MonoBehaviour
         {
             currentTouchPosition = touchingObjectTransform.position;
             deltaTouchPosition = currentTouchPosition - startTouchPosition;
-            float maxDeltaFinger = Mathf.Max(Mathf.Abs(deltaTouchPosition.x), Mathf.Abs(deltaTouchPosition.y), Mathf.Abs(deltaTouchPosition.z)); //TODO: Vector algebra for this?
+            float maxDeltaFinger = Mathf.Max(Mathf.Abs(deltaTouchPosition.x), Mathf.Abs(deltaTouchPosition.y), Mathf.Abs(deltaTouchPosition.z));
 
             if (Mathf.Abs(deltaTouchPosition.y) < MaxPushDistance && maxDeltaFinger > 0.0f)
             {
@@ -298,7 +298,6 @@ public class VRUIButtonBehaviour : MonoBehaviour
         return correctGesture;
     }
 
-    //TODO: besserer name, wie heisst dieses Konzept?
     private bool GetVRUIButtonDown
     {
         get { return getVRUIButtonDown; }

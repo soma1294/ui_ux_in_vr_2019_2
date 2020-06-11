@@ -18,6 +18,10 @@ public class VRUICustomMenu : MonoBehaviour
         GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/VRUI/VRUIPanel.prefab", typeof(GameObject)) as GameObject;
         GameObject instance = Instantiate(prefab);
         instance.name = "VRUIPanel";
+        if (Selection.activeGameObject)
+        {
+            instance.transform.SetParent(Selection.activeGameObject.transform);
+        }
         Undo.RegisterCreatedObjectUndo(instance, "Create VRUIPanel");
     }
 
@@ -27,6 +31,10 @@ public class VRUICustomMenu : MonoBehaviour
         GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/VRUI/VRUIScrollPanel.prefab", typeof(GameObject)) as GameObject;
         GameObject instance = Instantiate(prefab);
         instance.name = "VRUIScrollPanel";
+        if (Selection.activeGameObject)
+        {
+            instance.transform.SetParent(Selection.activeGameObject.transform);
+        }
         Undo.RegisterCreatedObjectUndo(instance, "Create VRUIScrollPanel");
     }
 
@@ -36,6 +44,10 @@ public class VRUICustomMenu : MonoBehaviour
         GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/VRUI/VRUIButton.prefab", typeof(GameObject)) as GameObject;
         GameObject instance = Instantiate(prefab);
         instance.name = "VRUIButton";
+        if (Selection.activeGameObject)
+        {
+            instance.transform.SetParent(Selection.activeGameObject.transform);
+        }
         Undo.RegisterCreatedObjectUndo(instance, "Create VRUIButton");
     }
 
@@ -45,6 +57,10 @@ public class VRUICustomMenu : MonoBehaviour
         GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/VRUI/VRUIToggle.prefab", typeof(GameObject)) as GameObject;
         GameObject instance = Instantiate(prefab);
         instance.name = "VRUIToggle";
+        if (Selection.activeGameObject)
+        {
+            instance.transform.SetParent(Selection.activeGameObject.transform);
+        }
         Undo.RegisterCreatedObjectUndo(instance, "Create VRUIToggle");
     }
 
@@ -54,6 +70,10 @@ public class VRUICustomMenu : MonoBehaviour
         GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/VRUI/VRUISlider.prefab", typeof(GameObject)) as GameObject;
         GameObject instance = Instantiate(prefab);
         instance.name = "VRUISlider";
+        if (Selection.activeGameObject)
+        {
+            instance.transform.SetParent(Selection.activeGameObject.transform);
+        }
         Undo.RegisterCreatedObjectUndo(instance, "Create VRUISlider");
     }
 
@@ -63,6 +83,10 @@ public class VRUICustomMenu : MonoBehaviour
         GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/VRUI/VRUITextcontainer.prefab", typeof(GameObject)) as GameObject;
         GameObject instance = Instantiate(prefab);
         instance.name = "VRUITextcontainer";
+        if (Selection.activeGameObject)
+        {
+            instance.transform.SetParent(Selection.activeGameObject.transform);
+        }
         Undo.RegisterCreatedObjectUndo(instance, "Create VRUITextcontainer");
     }
 }
