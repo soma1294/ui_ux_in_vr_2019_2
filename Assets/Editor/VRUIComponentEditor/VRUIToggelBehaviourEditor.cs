@@ -108,19 +108,22 @@ public class VRUIToggleBehaviourEditor : Editor
                 Matrix4x4 matrix = toggle.transform.localToWorldMatrix * Matrix4x4.Translate(previewPosition);
                 Handles.matrix = matrix;
                 Handles.color = Color.magenta;
-                Handles.DrawWireCube(Vector3.zero, size);
+                Vector3 drawAtPosition = Vector3.zero;
+                if (((BoxCollider)collider).center != Vector3.zero)
+                    drawAtPosition = ((BoxCollider)collider).center;
+                Handles.DrawWireCube(drawAtPosition, size);
                 //The position of the minPushDistance preview box (yellow)
                 previewPosition = new Vector3(0f, -(m_target.MaxPushDistance * m_target.MinPushToActivate) / toggle.transform.localScale.y, 0f);
                 matrix = toggle.transform.localToWorldMatrix * Matrix4x4.Translate(previewPosition);
                 Handles.matrix = matrix;
                 Handles.color = Color.yellow;
-                Handles.DrawWireCube(Vector3.zero, size);
+                Handles.DrawWireCube(drawAtPosition, size);
                 //The position of the stuckDistance preview box (green)
                 previewPosition = new Vector3(0f, -(m_target.MaxPushDistance * m_target.MinPushToActivate * m_target.StuckDistance) / toggle.transform.localScale.y, 0f);
                 matrix = toggle.transform.localToWorldMatrix * Matrix4x4.Translate(previewPosition);
                 Handles.matrix = matrix;
                 Handles.color = Color.green;
-                Handles.DrawWireCube(Vector3.zero, size);
+                Handles.DrawWireCube(drawAtPosition, size);
             }
         }
     }
